@@ -1,19 +1,17 @@
-(ns tools.sequencer.core)
+(ns tools.sequencer.core
+  (:require [clojure.string :as str]))
 
 ;; Sequencer generates sequences with the following responsibilities:
 
 (def default-options
-  {
-   :min    1 ;; lowest possible value
-   :max    8 ;; highest possible value
-   :len    4 ;; length of sequence
-   :sort   nil ;; sort may be < or >
-   ;; TODO implement
-
-   ;; dups key means the limit of duplicate numbers in the sequence.
-   ;; dups of 1 means each number is unique, 2 means that each number
-   ;;   may appear twice, and so on
-   :dups   1})
+  {:delimiter ", " ;; string to separate number
+   :min       1    ;; lowest possible value
+   :max       8    ;; highest possible value
+   :len       4    ;; length of sequence
+   :sort      nil  ;; sort may be < or >     ;; TODO implement sorting
+   :dups      1})  ;; dups key is the limit of duplicate nums in the sequence.
+                   ;; dups of 1 means each number is unique, 2 means that each number
+                   ;;   may appear twice, and so on
 
 ;; this allows options argument to be incomplete, ie. not containing all the keys needed
 (defn- or-default
@@ -55,7 +53,8 @@
 (defn generate!
   ([] (generate! default-options))
   ([options]
-   (let [full-opts (or-default options)]
-     (if (= 1 (:dups options))
-       (shuffle-range  full-opts)
-       (build-sequence full-opts)))))
+   (let [full-opts (or-default options)
+         result (if (= 1 (:dups options))
+                  (shuffle-range  full-opts)
+                  (build-sequence full-opts))]
+     (str/join (options :delimiter) result))))
