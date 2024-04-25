@@ -13,3 +13,9 @@
   :besr--4px
   :bssr--4px
   :bser--4px)
+
+(defclass toolmenu-button
+  :.pill :.small :.semi-bold)
+
+(defclass display-text
+  :.xxlarge :.bold :.black)
