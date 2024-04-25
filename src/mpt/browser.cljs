@@ -44,13 +44,16 @@
       [:p (sx :.display-text) @(rf/subscribe [::subs/toggler])])
     (when @(rf/subscribe [::subs/is-visible? :key])
       [:p (sx :.display-text) @(rf/subscribe [::subs/key])])
+    (when @(rf/subscribe [::subs/is-visible? :expression])
+      [:p (sx :.display-text) @(rf/subscribe [::subs/expression])])
    ]
   ])
 
 (def tools->gen-event
-  {:sequencer ::events/next-sequence
-   :toggler   ::events/next-toggle
-   :key       ::events/next-key})
+  {:sequencer  ::events/next-sequence
+   :toggler    ::events/next-toggle
+   :key        ::events/next-key
+   :expression ::events/next-expression})
 
 (defn tool-menu
   "This component allows configuration of the various tools and generation."
@@ -83,9 +86,10 @@
   "Contains all the tool-menu components for each individual tool."
   []
   [:div (sx :d--f :jc--c {:style {:flex-wrap "wrap" :gap "1rem"}})
-   [tool-menu "Sequencer" :sequencer]
-   [tool-menu "Toggler"   :toggler]
-   [tool-menu "Key"       :key]
+   [tool-menu "Sequencer"  :sequencer]
+   [tool-menu "Toggler"    :toggler]
+   [tool-menu "Key"        :key]
+   [tool-menu "Expression" :expression]
    ])
 
 (defn control-buttons
@@ -107,7 +111,7 @@
    [button ;; Generate New Data
     (sx :.filled :.pill :.xlarge :.semi-bold
         {:disabled (@metronome/state :isPlaying)
-         :on-click (fn [_] (rf/dispatch [::events/generate!]))})
+         :on-click (fn [_] (rf/dispatch [::events/generate! false]))})
     [icon :autorenew]]])
 
 (defn main-view []
