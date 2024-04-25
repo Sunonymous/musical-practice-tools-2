@@ -20,6 +20,9 @@
  ::key (fn [db] (get-in db [:music :key])))
 
 (rf/reg-sub
+ ::expression (fn [db] (get-in db [:music :expression])))
+
+(rf/reg-sub
  ::visible-tools
  (fn [db] (db :show)))
 

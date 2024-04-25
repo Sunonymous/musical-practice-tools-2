@@ -4,6 +4,7 @@
    [tools.sequencer.core :as sqncr]
    [tools.toggler.core   :as toggler]
    [tools.twelve-keys.views :refer [flat-keys]]
+   [tools.expression.core :refer [from-all]]
    [mpt.db :as db]))
 
 (rf/reg-event-db
@@ -12,6 +13,8 @@
 
 ;; Functions for generating next data are separated from events
 ;; so that they can be used individually and altogether w/o duplication.
+
+;; First as functions.
 
 (defn next-sequence
   [db]
@@ -42,16 +45,38 @@
               (assoc-in  [:music  :key] next-key)
               (update-in [:config :key] conj next-key)))))))
 
+;; TODO generalize this into a pattern that could be used between these functions
+
+(defn next-expression
+  [db]
+  (when-not ((db :lock) :expression)
+    (let [old-expr       (get-in db [:config :expression :seen])
+          full-expr      (from-all (get-in db [:config :expression :sources]))
+          potential-expr (remove old-expr full-expr)]
+      (if (empty? potential-expr)
+        (let [next-expr (rand-nth full-expr)]
+          (-> db
+              (assoc-in [:music  :expression] next-expr)
+              (assoc-in [:config :expression :seen] #{next-expr})))
+        (let [next-expr (rand-nth potential-expr)]
+          (-> db
+              (assoc-in  [:music  :expression] next-expr)
+              (update-in [:config :expression :seen] conj next-expr)))))))
+
 ;; Now as events.
 
 (rf/reg-event-db ::next-sequence next-sequence)
 (rf/reg-event-db ::next-toggle next-toggle)
 (rf/reg-event-db ::next-key next-key)
+(rf/reg-event-db ::next-expression next-expression)
 
 (rf/reg-event-db
  ::generate!
- (fn [{:keys [sync lock] :as db}]
-   (let [generate? #(and (sync %) (not (lock %)))]
+ (fn [{:keys [sync lock] :as db} [_ on-sync?]]
+   (let [generate? #(and (if on-sync?
+                           (sync %)
+                           true)
+                         (not (lock %)))]
      (cond-> db
        (generate? :sequencer)
        (next-sequence)
@@ -60,7 +85,10 @@
        (next-toggle)
 
        (generate? :key)
-       (next-key)))))
+       (next-key)
+
+       (generate? :expression)
+       (next-expression)))))
 
 ;; attr should be a kw matching a set value in db
 ;; tool is a keyword matching one of the tools
