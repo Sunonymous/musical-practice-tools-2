@@ -1,17 +1,17 @@
 ;; shadow-cljs configuration
 {:source-paths
  ["src/dev"
-  "src/main"
-  "src/test"]
+  "src/"]
 
  :dependencies
  [[reagent "1.1.1"]
   [binaryage/devtools "1.0.6"]
-  ;; Add Kushi dependency
+  [re-frame "1.4.2"]
   [design.kushi/kushi "1.0.0-a.19"]]
 
  :dev-http
- {8020 "public"}
+ {8020 "public"
+  8021 "out/test"}
 
  ;; Add cache-blockers for Kushi's side-effecting macros
  :cache-blockers #{kushi.core kushi.stylesheet}
@@ -21,7 +21,7 @@
   {:devtools         {:log false}
    :target           :browser
    :compiler-options {:output-feature-set :es8}
-   :modules          {:main {:init-fn starter.browser/init}}
+   :modules          {:main {:init-fn mpt.browser/init}}
    :build-hooks      [
                       ;; Add Kushi build hooks
                       (kushi.core/kushi-debug)
@@ -29,4 +29,6 @@
 
                       ;; This is optional but adds a nice build report for release builds
                       (shadow.cljs.build-report/hook
-                       {:output-to "tmp/report.html"})]}}}
+                       {:output-to "tmp/report.html"})]}
+  :test {:target :browser-test
+         :test-dir "out/test"}}}
