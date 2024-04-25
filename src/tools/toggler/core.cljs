@@ -1,11 +1,11 @@
-(ns tools.toggler.view
+(ns tools.toggler.core
   (:require
-   [kushi.core     :refer [sx]]
+   [kushi.core   :refer [sx]]
    [reagent.core :as r]))
 
-(defonce default-toggler-values ["On" "Off"])
+(defonce default-values ["On" "Off"])
 
-(defn- any-other-index [sq idx]
+(defn next-index [sq idx]
   (->> sq
      (map-indexed (fn [i _] i))
      (remove #(= idx %))
@@ -37,6 +37,6 @@
              (fn [_]
                (if @active?
                  (js/clearInterval @interval-id)
-                 (reset! interval-id (js/setInterval #(swap! on-idx (partial any-other-index values)) 1000)))
+                 (reset! interval-id (js/setInterval #(swap! on-idx (partial next-index values)) 1000)))
                (swap! active? not))})
         (if @active? "Deactivate" "Activate")]])))
