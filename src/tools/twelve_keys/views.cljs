@@ -6,11 +6,11 @@
 
 ;; Default Key Maps
 ;; Could construct these programmatically, though is it really worth the effort?
-(defonce default-keys-with-flats (into (sorted-map) {"A" false "B♭" false "B" false "C" false "D♭" false "D" false "E♭" false "E" false "F" false "G♭" false "G" false "A♭" false}))
-(defonce default-keys-with-sharps (into (sorted-map) {"A" false "A♯" false "B" false "C" false "C♯" false "D" false "D♯" false "E" false "F" false "F♯" false "G" false "G♯" false}))
+(defonce keys-with-flats (into (sorted-map) {"A" false "B♭" false "B" false "C" false "D♭" false "D" false "E♭" false "E" false "F" false "G♭" false "G" false "A♭" false}))
+(defonce keys-with-sharps (into (sorted-map) {"A" false "A♯" false "B" false "C" false "C♯" false "D" false "D♯" false "E" false "F" false "F♯" false "G" false "G♯" false}))
 
 (defn twelve-keys []
-  (let [state (r/atom default-keys-with-flats)]
+  (let [state (r/atom keys-with-flats)]
     (fn []
       [:div
        (sx :.full-rounded
