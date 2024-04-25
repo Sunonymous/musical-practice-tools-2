@@ -6,6 +6,9 @@
 
 ;; Default Key Maps
 ;; Could construct these programmatically, though is it really worth the effort?
+(defonce flat-keys ["A" "B♭" "B" "C" "D♭" "D" "E♭" "E" "F" "G♭" "G" "A♭"])
+(defonce sharp-keys ["A" "A♯" "B" "C" "C♯" "D" "D♯" "E" "F" "F♯" "G" "G♯" ])
+
 (defonce keys-with-flats (into (sorted-map) {"A" false "B♭" false "B" false "C" false "D♭" false "D" false "E♭" false "E" false "F" false "G♭" false "G" false "A♭" false}))
 (defonce keys-with-sharps (into (sorted-map) {"A" false "A♯" false "B" false "C" false "C♯" false "D" false "D♯" false "E" false "F" false "F♯" false "G" false "G♯" false}))
 
