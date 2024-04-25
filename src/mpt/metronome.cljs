@@ -66,8 +66,8 @@
            ;; Advance the beat number, wrap to zero
            :current16thNote (if (= 16 next16thNoteTime)
                               (do
-                                (rf/dispatch [::events/generate!]) ;; Generate data on new beat
-                                0)
+                                (rf/dispatch [::events/generate! true]) ;; Generate data on new beat
+                                0)                                      ;; pass true to indicate sync
                               next16thNoteTime))))
 
 (defn scheduleNote [beatNumber time]
