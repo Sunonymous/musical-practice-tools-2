@@ -1,5 +1,7 @@
 (ns mpt.metronome
-  (:require [reagent.core :as r]))
+  (:require [reagent.core  :as r]
+            [re-frame.core :as rf]
+            [mpt.events    :as events]))
 
 ;; using whacked's port -- found from -- https://gist.github.com/whacked/e44278a22358574cda3a
 ;; ref https://github.com/cwilso/metronome/blob/master/js/metronome.js
@@ -64,7 +66,7 @@
            ;; Advance the beat number, wrap to zero
            :current16thNote (if (= 16 next16thNoteTime)
                               (do
-                                (js/console.log "new beat")
+                                (rf/dispatch [::events/generate!]) ;; Generate data on new beat
                                 0)
                               next16thNoteTime))))
 
