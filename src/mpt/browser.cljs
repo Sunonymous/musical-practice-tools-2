@@ -1,7 +1,7 @@
 (ns mpt.browser
   (:require
    ;; Require various functions and macros from kushi.core
-   [kushi.core :refer [sx add-google-font!]     ]
+   [kushi.core :refer [sx add-google-font! inject!]]
    [kushi.ui.card.core      :refer [card]       ]
    [kushi.ui.button.core    :refer [button]     ]
    [kushi.ui.icon.core      :refer [icon]       ]
@@ -39,36 +39,53 @@
              :ff--Inter|sans-serif
              {:style {:flex-wrap "wrap"}})
     (when @(rf/subscribe [::subs/is-visible? :sequencer])
-      [:p @(rf/subscribe [::subs/sequence])])
+      [:p (sx :.display-text) @(rf/subscribe [::subs/sequence])])
     (when @(rf/subscribe [::subs/is-visible? :toggler])
-      [:p @(rf/subscribe [::subs/toggler])])
+      [:p (sx :.display-text) @(rf/subscribe [::subs/toggler])])
     (when @(rf/subscribe [::subs/is-visible? :key])
-      [:p @(rf/subscribe [::subs/key])])
+      [:p (sx :.display-text) @(rf/subscribe [::subs/key])])
    ]
   ])
 
+(def tools->gen-event
+  {:sequencer ::events/next-sequence
+   :toggler   ::events/next-toggle
+   :key       ::events/next-key})
+
 (defn tool-menu
-  "This component is reused for configuration of the various tools
-   and generation."
+  "This component allows configuration of the various tools and generation."
   [title tool-kw]
-  [card (sx :w--fit-content :mb--1rem :.rounded)
-   [:span (sx :.medium :.bold) title]
-   [:div (sx :d--f :pb--0.5rem {:style {:gap "8px"}})
-    [button (sx :.filled :.pill :.small :.semi-bold
-                {:on-click #(rf/dispatch [::events/toggle-visible tool-kw])})
-     [icon (if @(rf/subscribe [::subs/is-visible? tool-kw])
-             :visibility
-             :visibility-off)]]
-    [button (sx :.filled :.pill :.small :.semi-bold) [icon :lock]]
-    [button (sx :.filled :.pill :.small :.semi-bold) [icon :autorenew]]]]
+  (let [visible? @(rf/subscribe [::subs/is-visible? tool-kw])
+        locked?  @(rf/subscribe [::subs/is-locked?  tool-kw])
+        synced?  @(rf/subscribe [::subs/is-synced?  tool-kw])]
+    [card (sx :w--fit-content :mb--1rem :.rounded)
+     [:span (sx :.medium :.bold) title]
+     [:div (sx :d--f :pb--0.5rem {:style {:gap "8px"}})
+      [button (sx :.toolmenu-button (when visible? :.filled)
+                  {:on-click #(rf/dispatch [::events/toggle-tool-attribute :show tool-kw])
+                   :aria-label (str "Show or Hide " title)})
+       [icon (if visible? :visibility :visibility-off)]]
+      [button (sx :.toolmenu-button (when locked? :.filled)
+                  {:on-click #(rf/dispatch [::events/toggle-tool-attribute :lock tool-kw])
+                   :aria-label (str "Lock " title)})
+       [icon (if locked? :lock :lock-open)]]
+      [button (sx :.toolmenu-button
+                  {:on-click #(rf/dispatch [(tools->gen-event tool-kw)])
+                   :aria-label (str "Generate " title)})
+       [icon :autorenew]]
+      [button (sx :.toolmenu-button (when synced? :.filled)
+                  {:on-click #(rf/dispatch [::events/toggle-tool-attribute :sync tool-kw])
+                   :aria-label (str "Sync " title " with Metronome")})
+       [icon (if synced? :update :update-disabled)]]]])
   )
 
 (defn toolsbar
   "Contains all the tool-menu components for each individual tool."
   []
-  [:div (sx :d--f {:style {:flex-wrap "wrap" :gap "1rem"}})
+  [:div (sx :d--f :jc--c {:style {:flex-wrap "wrap" :gap "1rem"}})
    [tool-menu "Sequencer" :sequencer]
    [tool-menu "Toggler"   :toggler]
+   [tool-menu "Key"       :key]
    ])
 
 (defn control-buttons
@@ -101,8 +118,6 @@
        :ai--c)
    [display-panel]
    [toolsbar]
-   [twelve-keys]
-  ;;  [:pre (sx :c--white) @(rf/subscribe [::subs/full])]
    [:canvas#metrocanvas (sx :d--none)]
    [control-buttons]
   ])
@@ -120,5 +135,10 @@
   ;; Ready to go!
   (start))
 
-;; this is called before any code is reloaded
-(defn ^:dev/before-load stop [] (js/location.reload))
+(defn ^:dev/before-load stop
+  [] ;; reload the page for a fresh start
+  (js/location.reload))
+
+;; Dev build fix for strange kushi behavior
+(when ^boolean js/goog.DEBUG
+  (inject!))
