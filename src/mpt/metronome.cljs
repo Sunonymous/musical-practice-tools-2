@@ -159,7 +159,7 @@
           (doto ctx
             (aset "fillStyle" (if (= currentNote i)
                                 (if (= 0 (mod currentNote 4))
-                                  "red"
+                                  "gold"
                                   "blue")
                                 "black"))
             (.fillRect (* x (+ 1 i)) 0
