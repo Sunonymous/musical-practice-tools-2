@@ -11,23 +11,27 @@
 ;; init() expects an existing AudioContext which is initialized and stored in the db;
 ;; also expects that DOM contains a canvas with id "metrocanvas"
 
-(def state
+(def constants {:min-tempo 50 :max-tempo 200
+                :starting-tempo 100})
+
+(defonce state
   (r/atom {
          :audioContext nil
-         :isPlaying false         ;; Are we currently playing?
-         :startTime nil           ;; The start time of the entire sequence.
-         :current16thNote nil     ;; What note is currently last scheduled?
-         :tempo 100.0             ;; tempo (in beats per minute)
-         :lookahead 25.0          ;; How frequently to call scheduling function (in milliseconds)
-         :scheduleAheadTime 0.1   ;; How far ahead to schedule audio (sec)
-                                  ;; This is calculated from lookahead, and overlaps
-                                  ;; with next interval (in case the timer is late)
-         :nextNoteTime 0.0        ;; when the next note is due.
-         :noteResolution 0        ;; 0 =16th, 1 =8th, 2 =quarter note
-         :noteLength 0.1          ;; length of "beep" (in seconds)
-         :canvas nil              ;; the canvas element
-         :canvasContext nil       ;; canvasContext is the canvas' context 2D
-         :last16thNoteDrawn -1    ;; the last "box" we drew on the screen
+         :isPlaying false                   ;; Are we currently playing?
+         :startTime nil                     ;; The start time of the entire sequence.
+         :current16thNote nil               ;; What note is currently last scheduled?
+         :tempo (constants :starting-tempo) ;; tempo (in beats per minute)
+         :lookahead 25.0                    ;; How frequently to call scheduling function (in milliseconds)
+         :scheduleAheadTime 0.1             ;; How far ahead to schedule audio (sec)
+                                            ;; This is calculated from lookahead, and overlaps
+                                            ;; with next interval (in case the timer is late)
+         :nextNoteTime 0.0                  ;; when the next note is due.
+         :noteResolution 0                  ;; 0 =16th, 1 =8th, 2 =quarter note
+         :noteLength 0.1                    ;; length of "beep" (in seconds)
+         :canvas nil                        ;; the canvas element
+         :canvasContext nil                 ;; canvasContext is the canvas' context 2D
+         :last16thNoteDrawn -1              ;; the last "box" we drew on the screen
+         :silent false                      ;; when true, doesn't produce sound
 
          :timerWorker nil         ;; The Web Worker used to fire timer messages
          }
@@ -66,7 +70,7 @@
            ;; Advance the beat number, wrap to zero
            :current16thNote (if (= 16 next16thNoteTime)
                               (do
-                                (rf/dispatch [::events/generate! true]) ;; Generate data on new beat
+                                (rf/dispatch [::events/next-beat]) ;; Generate data on new beat
                                 0)                                      ;; pass true to indicate sync
                               next16thNoteTime))))
 
@@ -84,17 +88,18 @@
              )
 
     ;; create an oscillator
-    (let [context (@state :audioContext)
-          osc (.createOscillator context)]
-      (doto osc
-        (.connect (aget context "destination"))
-        (aset "frequency" "value"
-              (cond (= 0 (mod beatNumber 16)) 880.0 ;; beat 0 == low pitch
-                    (= 0 (mod beatNumber 4))  440.0 ;; quarter notes = medium pitch
-                    :else 220.0 ;; other 16th notes = high pitch
-                    ))
-        (.start time)
-        (.stop (+ time (@state :noteLength)))))))
+    (when-not (@state :silent)
+      (let [context (@state :audioContext)
+            osc (.createOscillator context)]
+        (doto osc
+          (.connect (aget context "destination"))
+          (aset "frequency" "value"
+                (cond (= 0 (mod beatNumber 16)) 880.0 ;; beat 0 == low pitch
+                      (= 0 (mod beatNumber 4))  440.0 ;; quarter notes = medium pitch
+                      :else 220.0 ;; other 16th notes = high pitch
+                      ))
+          (.start time)
+          (.stop (+ time (@state :noteLength))))))))
 
 (defn scheduler []
   ;; while there are notes that will need to play before the next interval,

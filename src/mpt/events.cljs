@@ -99,3 +99,25 @@
    (if ((db attr) tool)
      (update db attr disj tool)
      (update db attr conj tool))))
+
+(rf/reg-event-db
+ ::set-beat-cap
+ (fn [db [_ beats]]
+   (js/console.log "set-beat-cap to: " beats)
+   (assoc db :beats-to-change beats)))
+
+(rf/reg-event-db
+ ::reset-beat-counter
+ (fn [db]
+   (assoc db :remaining-beats (get db :beats-to-change))))
+
+;; :remaining-beats counts down until 0, at which point it is reset
+(rf/reg-event-db
+ ::next-beat
+ (fn [db]
+   (let [remaining-beats (db :remaining-beats)]
+     (if (= remaining-beats 1)
+       (do
+         (rf/dispatch [::generate! true]) ;; pass true to indicate sync source
+         (rf/dispatch [::reset-beat-counter]))
+       (update db :remaining-beats dec)))))

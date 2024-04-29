@@ -10,6 +10,8 @@
    :show  #{}                           ;; Set containing the tools shown in display.
    :lock  #{}                           ;; Set containing the tools which should not regenerate.
    :sync  #{}                           ;; Set containing the tools which regenerate on bar.
+   :remaining-beats 1                   ;; Dynamic count of beats until next generation.
+   :beats-to-change 1                   ;; Alterable cap used to reset remaining-beats.
    :config {:sequencer   sqncr/default-options
             :toggler     toggler/default-values
             :key         #{}            ;; This value is a set containing all keys already used.

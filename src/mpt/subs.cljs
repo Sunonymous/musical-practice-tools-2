@@ -23,6 +23,14 @@
  ::expression (fn [db] (get-in db [:music :expression])))
 
 (rf/reg-sub
+ ::remaining-beats
+ (fn [db] (db :remaining-beats)))
+
+(rf/reg-sub
+ ::beats-to-change
+ (fn [db] (db :beats-to-change)))
+
+(rf/reg-sub
  ::visible-tools
  (fn [db] (db :show)))
 
