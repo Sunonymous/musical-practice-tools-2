@@ -1,14 +1,15 @@
 (ns mpt.browser
   (:require
    ;; Require various functions and macros from kushi.core
-   [kushi.core :refer [sx add-google-font! inject!]]
-   [kushi.ui.card.core         :refer [card]       ]
-   [kushi.ui.button.core       :refer [button]     ]
-   [kushi.ui.icon.core         :refer [icon]       ]
-   [kushi.ui.input.text.core   :refer [input]      ]
-   [kushi.ui.input.switch.core :refer [switch]     ]
-   [tools.toggler.core         :refer [toggler]    ]
-   [tools.twelve-keys.views    :refer [twelve-keys]]
+   [kushi.core :refer [sx add-google-font! inject! merge-attrs]]
+   [kushi.ui.card.core         :refer [card]         ]
+   [kushi.ui.button.core       :refer [button]       ]
+   [kushi.ui.icon.core         :refer [icon]         ]
+   [kushi.ui.input.text.core   :refer [input]        ]
+   [kushi.ui.input.switch.core :refer [switch]       ]
+   [kushi.ui.tooltip.core      :refer [tooltip-attrs]]
+   [tools.toggler.core         :refer [toggler]      ]
+   [tools.twelve-keys.views    :refer [twelve-keys]  ]
    [mpt.metronome        :as metronome]
    [mpt.events           :as events]
    [reagent.dom          :as rdom]
@@ -107,19 +108,25 @@
          :jc--sb
          :gap--1rem)
    [button ;; Toggle Metronome
-    (sx :.filled :.pill :.xlarge :.semi-bold
-        {:on-click (fn [_] (rf/dispatch [::events/reset-beat-counter])
-                           (metronome/play))})
+    (merge-attrs
+     (sx :.filled :.pill :.xlarge :.semi-bold
+         {:on-click (fn [_] (rf/dispatch [::events/reset-beat-counter])
+                      (metronome/play))})
+     (tooltip-attrs {:-text "Start/Stop Metronome"}))
     [icon (if (@metronome/state :isPlaying) :pause :play-arrow)]]
    [button ;; Generate New Data
-    (sx :.filled :.pill :.xlarge :.semi-bold
-        {:disabled (@metronome/state :isPlaying)
+    (merge-attrs
+     (sx :.filled :.pill :.xlarge :.semi-bold
+                     {:disabled (@metronome/state :isPlaying)
          ;; pass false on event because generation is manual
-         :on-click (fn [_] (rf/dispatch [::events/generate! false]))})
+                      :on-click (fn [_] (rf/dispatch [::events/generate! false]))})
+     (tooltip-attrs {:-text "Generate New Data"}))
     [icon :autorenew]]
    [button ;; Mute Metronome
-    (sx :.filled :.pill :.xlarge :.semi-bold
-        {:on-click (fn [_] (swap! metronome/state update :silent not))})
+    (merge-attrs
+     (sx :.filled :.pill :.xlarge :.semi-bold
+         {:on-click (fn [_] (swap! metronome/state update :silent not))})
+     (tooltip-attrs {:-text "Un/mute Metronome"}))
     [icon (if (@metronome/state :silent) :volume-off :volume-up)]]])
 
 (defn metronome-controls
