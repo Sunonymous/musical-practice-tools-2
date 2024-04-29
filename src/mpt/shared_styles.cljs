@@ -14,6 +14,13 @@
   :bssr--4px
   :bser--4px)
 
+(defclass control-group
+  :w--100%
+  :d--f
+  :jc--c
+  :bgc--white
+  :ai--c)
+
 (defclass toolmenu-button
   :.pill :.small :.semi-bold)
 

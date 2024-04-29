@@ -103,12 +103,9 @@
    and control the metronome and new generation."
   []
   [:div (sx
-         :d--f
+         :.control-group
          :jc--sb
-         :pi--2rem
-         :pb--1rem
-         :bgc--white
-         {:style {:gap "1rem"}})
+         :gap--1rem)
    [button ;; Toggle Metronome
     (sx :.filled :.pill :.xlarge :.semi-bold
         {:on-click (fn [_] (rf/dispatch [::events/reset-beat-counter])
@@ -128,18 +125,10 @@
 (defn metronome-controls
   "Buttons to control the operation of the metronome."
   []
-  (let [adjust-tempo (fn [amt _]
+  (let [adjust-tempo (fn [amt _] ;; used with partial; receives event arg
                        (swap! metronome/state update  :tempo #(+ % amt)))]
     (fn []
-      [:div (sx
-             :w--100%
-             :bgc--white
-             :d--f
-             :jc--c
-             :mb---1.25rem
-             :ai--c
-             :p--0.5rem
-             :gap--0.35rem)
+      [:div (sx :.control-group :pb--0.25rem :gap--0.35rem)
        [button ;; Bump-down Tempo Metronome
         (sx :.metronome-button
             {:on-click (partial adjust-tempo -5)})
@@ -172,15 +161,7 @@
         total-beats* (fn [] (if @bars? (* 4 @number) @number))]
     (fn []
       [:div
-       (sx
-        :w--100%
-        :jc--c
-        :bgc--white
-        :d--f
-        :ai--c
-        :p--0.5rem
-        :gap--0.5rem
-        {:style {:margin-top "0.5rem"}})
+       (sx :.control-group :gap--0.5rem)
        [:p "Change every"]
        [:input (sx :w--3rem :b--1px:solid:black :ta--c
                    {:type :number
@@ -193,6 +174,7 @@
          :.xlarge :$switch-width-ratio--2.25
          {:-track-content-on "Bar" :-track-content-off "Beat"
           :-on? @bars?
+          :-thumb-attrs (sx :.convex)
           :on-click (fn [_]
                       (swap! bars? not)
                       (update-cap (total-beats*)))})]])))
@@ -206,7 +188,7 @@
    [display-panel]
    [toolsbar]
    [:canvas#metrocanvas #_(sx :d--none)]
-   [card (sx :w--fit-content :pi--1rem :mb--1rem :.rounded)
+   [card (sx :.flex-col-c :gap--0.25rem :w--fit-content :pi--2rem :mb--1rem :.rounded)
     [control-buttons]
     [metronome-controls]
     [sync-controls]]])
