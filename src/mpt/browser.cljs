@@ -2,11 +2,13 @@
   (:require
    ;; Require various functions and macros from kushi.core
    [kushi.core :refer [sx add-google-font! inject!]]
-   [kushi.ui.card.core      :refer [card]       ]
-   [kushi.ui.button.core    :refer [button]     ]
-   [kushi.ui.icon.core      :refer [icon]       ]
-   [tools.toggler.core      :refer [toggler]    ]
-   [tools.twelve-keys.views :refer [twelve-keys]]
+   [kushi.ui.card.core         :refer [card]       ]
+   [kushi.ui.button.core       :refer [button]     ]
+   [kushi.ui.icon.core         :refer [icon]       ]
+   [kushi.ui.input.text.core   :refer [input]      ]
+   [kushi.ui.input.switch.core :refer [switch]     ]
+   [tools.toggler.core         :refer [toggler]    ]
+   [tools.twelve-keys.views    :refer [twelve-keys]]
    [mpt.metronome        :as metronome]
    [mpt.events           :as events]
    [reagent.dom          :as rdom]
@@ -45,9 +47,13 @@
     (when @(rf/subscribe [::subs/is-visible? :key])
       [:p (sx :.display-text) @(rf/subscribe [::subs/key])])
     (when @(rf/subscribe [::subs/is-visible? :expression])
-      [:p (sx :.display-text) @(rf/subscribe [::subs/expression])])
-   ]
-  ])
+      [:p (sx :.display-text) @(rf/subscribe [::subs/expression])])]
+   (let [remaining-beats @(rf/subscribe [::subs/remaining-beats])]
+     [:p (sx :p--relative :pb--0.25rem :.small :.oblique :ta--right
+             {:style {:visibility (if (@metronome/state :isPlaying) :visible :hidden)}})
+      (if (= remaining-beats 1)
+        "New generation on next beat."
+        (str "New generation in " remaining-beats " beats."))])])
 
 (def tools->gen-event
   {:sequencer  ::events/next-sequence
@@ -98,21 +104,98 @@
   []
   [:div (sx
          :d--f
-         :.pill
-         :mb--1rem
+         :jc--sb
          :pi--2rem
          :pb--1rem
          :bgc--white
          {:style {:gap "1rem"}})
    [button ;; Toggle Metronome
     (sx :.filled :.pill :.xlarge :.semi-bold
-        {:on-click (fn [_] (metronome/play))})
+        {:on-click (fn [_] (rf/dispatch [::events/reset-beat-counter])
+                           (metronome/play))})
     [icon (if (@metronome/state :isPlaying) :pause :play-arrow)]]
    [button ;; Generate New Data
     (sx :.filled :.pill :.xlarge :.semi-bold
         {:disabled (@metronome/state :isPlaying)
+         ;; pass false on event because generation is manual
          :on-click (fn [_] (rf/dispatch [::events/generate! false]))})
-    [icon :autorenew]]])
+    [icon :autorenew]]
+   [button ;; Mute Metronome
+    (sx :.filled :.pill :.xlarge :.semi-bold
+        {:on-click (fn [_] (swap! metronome/state update :silent not))})
+    [icon (if (@metronome/state :silent) :volume-off :volume-up)]]])
+
+(defn metronome-controls
+  "Buttons to control the operation of the metronome."
+  []
+  (let [adjust-tempo (fn [amt _]
+                       (swap! metronome/state update  :tempo #(+ % amt)))]
+    (fn []
+      [:div (sx
+             :w--100%
+             :bgc--white
+             :d--f
+             :jc--c
+             :mb---1.25rem
+             :ai--c
+             :p--0.5rem
+             :gap--0.35rem)
+       [button ;; Bump-down Tempo Metronome
+        (sx :.metronome-button
+            {:on-click (partial adjust-tempo -5)})
+        [icon :keyboard-double-arrow-left]]
+       [button ;; Nudge-down Tempo Metronome
+        (sx :.metronome-button
+            {:on-click (partial adjust-tempo -1)})
+        [icon :keyboard-arrow-left]]
+
+       [:p
+        [:span (sx :.bold) " " (@metronome/state :tempo) " "]
+        [:span (sx :.oblique) "BPM"]]
+
+       [button ;; Nudge-up Tempo Metronome
+        (sx :.metronome-button
+            {:on-click (partial adjust-tempo 1)})
+        [icon :keyboard-arrow-right]]
+       [button ;; Bump-up Tempo Metronome
+        (sx :.metronome-button
+            {:on-click (partial adjust-tempo 5)})
+        [icon :keyboard-double-arrow-right]]])))
+
+(defn sync-controls
+  "Buttons to control the sync of the generation with the metronome."
+  []
+  (let [bars?  (r/atom false)
+        number (r/atom @(rf/subscribe [::subs/beats-to-change]))
+        update-cap #(rf/dispatch [::events/set-beat-cap %])
+        total-beats* (fn [] (if @bars? (* 4 @number) @number))]
+    (fn []
+      (let [total-beats (if @bars? (* 4 @number) @number)]
+        [:div
+         (sx
+          :w--100%
+          :jc--c
+          :bgc--white
+          :d--f
+          :ai--c
+          :p--0.5rem
+          :gap--0.5rem
+          {:style {:margin-top "0.5rem"}})
+         [:p "Change every"]
+         [:input (sx :w--3rem :b--1px:solid:black :ta--c
+                     {:type :number
+                      :style {:align-self :flex-start}
+                      :on-change (fn [e] (reset! number (-> e .-target .-value js/parseInt))
+                                         (update-cap total-beats))
+                      :value @number})]
+         [switch
+          (sx
+           :.xlarge :$switch-width-ratio--2.25
+           {:-track-content-on "Bar" :-track-content-off "Beat"
+            :-on? @bars?
+            :on-click (fn [e]
+                         (swap! bars? not)
+                         (update-cap (total-beats*)))})]]))))
 
 (defn main-view []
   [:div
@@ -122,9 +205,11 @@
        :ai--c)
    [display-panel]
    [toolsbar]
-   [:canvas#metrocanvas (sx :d--none)]
-   [control-buttons]
-  ])
+   [:canvas#metrocanvas #_(sx :d--none)]
+   [card (sx :w--fit-content :pi--1rem :mb--1rem :.rounded)
+    [control-buttons]
+    [metronome-controls]
+    [sync-controls]]])
 
 ;; start is called by init and after code reloading finishes
 (defn ^:dev/after-load start []

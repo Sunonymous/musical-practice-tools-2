@@ -17,5 +17,8 @@
 (defclass toolmenu-button
   :.pill :.small :.semi-bold)
 
+(defclass metronome-button
+  :.filled :.pill :.small :.semi-bold :bgc--gray)
+
 (defclass display-text
   :.xxlarge :.bold :.black)
