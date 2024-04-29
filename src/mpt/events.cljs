@@ -103,7 +103,6 @@
 (rf/reg-event-db
  ::set-beat-cap
  (fn [db [_ beats]]
-   (js/console.log "set-beat-cap to: " beats)
    (assoc db :beats-to-change beats)))
 
 (rf/reg-event-db
