@@ -168,34 +168,34 @@
   (let [bars?  (r/atom false)
         number (r/atom @(rf/subscribe [::subs/beats-to-change]))
         update-cap #(rf/dispatch [::events/set-beat-cap %])
+        ;; had to convert this into fn to get most up-to-date value
         total-beats* (fn [] (if @bars? (* 4 @number) @number))]
     (fn []
-      (let [total-beats (if @bars? (* 4 @number) @number)]
-        [:div
-         (sx
-          :w--100%
-          :jc--c
-          :bgc--white
-          :d--f
-          :ai--c
-          :p--0.5rem
-          :gap--0.5rem
-          {:style {:margin-top "0.5rem"}})
-         [:p "Change every"]
-         [:input (sx :w--3rem :b--1px:solid:black :ta--c
-                     {:type :number
-                      :style {:align-self :flex-start}
-                      :on-change (fn [e] (reset! number (-> e .-target .-value js/parseInt))
-                                         (update-cap total-beats))
-                      :value @number})]
-         [switch
-          (sx
-           :.xlarge :$switch-width-ratio--2.25
-           {:-track-content-on "Bar" :-track-content-off "Beat"
-            :-on? @bars?
-            :on-click (fn [e]
-                         (swap! bars? not)
-                         (update-cap (total-beats*)))})]]))))
+      [:div
+       (sx
+        :w--100%
+        :jc--c
+        :bgc--white
+        :d--f
+        :ai--c
+        :p--0.5rem
+        :gap--0.5rem
+        {:style {:margin-top "0.5rem"}})
+       [:p "Change every"]
+       [:input (sx :w--3rem :b--1px:solid:black :ta--c
+                   {:type :number
+                    :style {:align-self :flex-start}
+                    :on-change (fn [e] (reset! number (-> e .-target .-value js/parseInt))
+                                 (update-cap (total-beats*)))
+                    :value @number})]
+       [switch
+        (sx
+         :.xlarge :$switch-width-ratio--2.25
+         {:-track-content-on "Bar" :-track-content-off "Beat"
+          :-on? @bars?
+          :on-click (fn [_]
+                      (swap! bars? not)
+                      (update-cap (total-beats*)))})]])))
 
 (defn main-view []
   [:div
