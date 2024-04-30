@@ -3,7 +3,7 @@
    [kushi.core   :refer [sx]]
    [reagent.core :as r]))
 
-(defonce default-values ["On" "Off"])
+(defonce default-values ["Ascending" "Descending"])
 
 (defn next-index [sq idx]
   (->> sq
