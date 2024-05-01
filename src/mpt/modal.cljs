@@ -123,6 +123,9 @@
    :toggler-values      [values-config-component]
    :key-editor          [twelve-keys/key-editor]
    :use-sharps?         [switch-toggle "Use Sharps?" :use-sharps? :use-sharps?]
+   ;; TODO known issue -- when user toggles sharps, does not auto-reset keys
+   ;; only real consequence is that it may reset before all 12 keys with the new
+   ;; designation are completed. only happens when user switches with keys already complete
    :alert-on-complete?  [switch-toggle "Alert when all keys completed?" :alert-on-complete? :alert-on-complete?]
    :sequencer-min-max   [sequencer-min-max]
    :sequencer-delimiter [:div (sx :w--25% :mi--auto)
@@ -143,7 +146,7 @@
 (def toolkw->settings
   {:sequencer  [:sequencer-min-max :sequencer-len-dups :sequencer-delimiter #_:use-roman-numerals?] ;; TODO re-enable once implemented
    :toggler    [:toggler-values]
-   :key        [:key-editor #_:use-sharps? #_:alert-on-complete?] ;; TODO re-enable once implemented
+   :key        [:key-editor :use-sharps? #_:alert-on-complete?] ;; TODO re-enable once implemented
    :expression [:expression-source]})
 
 (defn config

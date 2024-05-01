@@ -9,14 +9,16 @@
    [re-frame.core :as rf]
    [reagent.core  :as r]))
 
-;; TODO create way of toggling to sharps from flats
-
 (defn key-editor
   "Used as a sort of editor to configure which keys can be excluded or selected."
   []
-  (let [selected-key   (r/atom nil)]
+  (let [
+        selected-key (r/atom nil)]
     (fn []
-      (let [current-key   @(rf/subscribe [::subs/key])
+      (let [all-keys     (if @(rf/subscribe [::subs/nested-value [:config :use-sharps?]])
+                           musical-keys-with-sharps
+                           musical-keys-with-flats)
+            current-key   @(rf/subscribe [::subs/key])
             excluded-keys @(rf/subscribe [::subs/excluded-keys])
             seen-keys     @(rf/subscribe [::subs/seen-keys])
             selected-excluded? (excluded-keys @selected-key)
@@ -24,7 +26,7 @@
         [:div
          [:div
           (sx :d--f)
-          (for [key musical-keys-with-flats]
+          (for [key all-keys]
             (let [active?   (= key current-key)
                   excluded? (excluded-keys key)
                   seen?     (seen-keys key)]
