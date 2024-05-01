@@ -1,5 +1,6 @@
 (ns tools.twelve-keys.views
   (:require
+   [mpt.db :refer [musical-keys-with-flats musical-keys-with-sharps]]
    [kushi.ui.input.switch.core :refer [switch]]
    [kushi.ui.button.core       :refer [button]]
    [kushi.core                 :refer [sx]]
@@ -8,15 +9,7 @@
    [re-frame.core :as rf]
    [reagent.core  :as r]))
 
-;; Default Key Maps
-;; These were moved into DB to prevent circular depencency.
-;; TODO find where they are used and change the references.
-(defonce flat-keys ["A" "B♭" "B" "C" "D♭" "D" "E♭" "E" "F" "G♭" "G" "A♭"])
-(defonce sharp-keys ["A" "A♯" "B" "C" "C♯" "D" "D♯" "E" "F" "F♯" "G" "G♯" ])
 ;; TODO create way of toggling to sharps from flats
-
-(defonce keys-with-flats (into (sorted-map) {"A" false "B♭" false "B" false "C" false "D♭" false "D" false "E♭" false "E" false "F" false "G♭" false "G" false "A♭" false}))
-(defonce keys-with-sharps (into (sorted-map) {"A" false "A♯" false "B" false "C" false "C♯" false "D" false "D♯" false "E" false "F" false "F♯" false "G" false "G♯" false}))
 
 (defn key-editor
   "Used as a sort of editor to configure which keys can be excluded or selected."
@@ -31,7 +24,7 @@
         [:div
          [:div
           (sx :d--f)
-          (for [key flat-keys]
+          (for [key musical-keys-with-flats]
             (let [active?   (= key current-key)
                   excluded? (excluded-keys key)
                   seen?     (seen-keys key)]
