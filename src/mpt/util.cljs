@@ -22,3 +22,12 @@
   ([values] (values->str ", " values))
   ([delimiter values]
    (join delimiter values)))
+
+(defn max-possible-length
+  "This function is used to calculate the maximum possible length of
+   a given sequence, using its generation parameters."
+  [options]
+  (let [minn (options :min)
+        maxx (options :max) ;; bad idea to shadow functions with min/max...
+        dups (options :dups)]
+     (count (mapcat #(repeat dups %) (range minn (inc maxx))))))
