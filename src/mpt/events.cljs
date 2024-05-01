@@ -2,8 +2,8 @@
   (:require
    [tools.expression.core   :refer [from-all]  ]
    [clojure.string          :refer [split trim]]
-   [mpt.util                :refer [next-index is-musical-key?]]
    [tools.sequencer.core    :as sqncr]
+   [mpt.util                :as util]
    [re-frame.core           :as rf]
    [mpt.db                  :as db]))
 
@@ -26,7 +26,7 @@
   [db]
   (when-not ((db :lock) :toggler)
     (assoc-in db [:music :toggler]
-              (next-index
+              (util/next-index
                (get-in db [:config :toggler])
                (get-in db [:music :toggler])))))
 
@@ -147,6 +147,17 @@
    (assoc-in db db-path str)))
 
 (rf/reg-event-db
+ ;; this event prevents the length of the sequence from exceeding the max possible
+ ::enforce-max-length
+ (fn [db]
+   (let [options (get-in db [:config :sequencer])
+         len     (options :len)
+         cap     (util/max-possible-length (get-in db [:config :sequencer]))]
+     (if (< cap len)
+       (assoc-in db [:config :sequencer :len] cap)
+       db))))
+
+(rf/reg-event-db
  ::set-expression-source
  (fn [db [_ source]]
    (let [formatted-source (keyword source)]
@@ -167,14 +178,14 @@
 (rf/reg-event-db
  ::toggle-exclude-key
  (fn [db [_ key]]
-   (when (is-musical-key? key)
+   (when (util/is-musical-key? key)
      (let [is-excluded? ((get-in db [:config :key :excluded]) key)]
        (update-in db [:config :key :excluded] (if is-excluded? disj conj) key)))))
 
 (rf/reg-event-db
  ::toggle-seen-key
  (fn [db [_ key]]
-   (when (is-musical-key? key)
+   (when (util/is-musical-key? key)
      (let [is-seen? ((get-in db [:config :key :seen]) key)]
        (update-in db [:config :key :seen] (if is-seen? disj conj) key)))))
 
@@ -188,7 +199,7 @@
 (rf/reg-event-db
  ::focus-key ;; sets key to active generation and sees it
  (fn [db [_ key]]
-   (when (is-musical-key? key)
+   (when (util/is-musical-key? key)
      (-> db
          (assoc-in [:music :key] key)
          (update-in [:config :key :seen] conj key)))))

@@ -1,6 +1,7 @@
 (ns mpt.subs
   (:require
-   [re-frame.core :as rf]))
+   [re-frame.core :as rf]
+   [mpt.util :as util]))
 
 (rf/reg-sub
  ::audio-context
@@ -8,6 +9,16 @@
    (:audio-context db)))
 
 (rf/reg-sub ::sequence (fn [db] (get-in db [:music :sequence])))
+
+(rf/reg-sub
+ ::sequencer-options
+ (fn [db]
+   (get-in db [:config :sequencer])))
+
+(rf/reg-sub
+ ::max-length-possible
+ (fn [] (rf/subscribe [::sequencer-options]))
+ (fn [options] (util/max-possible-length options)))
 
 (rf/reg-sub
  ::toggler

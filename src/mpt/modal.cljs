@@ -1,7 +1,6 @@
 (ns mpt.modal
     (:require
-     [kushi.ui.modal.core        :refer [modal modal-close-button
-                                         open-kushi-modal close-kushi-modal]]
+     [kushi.ui.modal.core        :refer [modal open-kushi-modal close-kushi-modal]]
      [kushi.core                 :refer [sx    ]]
      [kushi.ui.input.text.core   :refer [input ]]
      [kushi.ui.input.switch.core :refer [switch]]
@@ -10,11 +9,9 @@
      [kushi.ui.input.slider.core :refer [slider]]
      [tools.twelve-keys.views    :as twelve-keys]
      [tools.expression.core      :as expression]
-     [tools.toggler.core         :as toggler]
      [mpt.events    :as events]
      [mpt.util      :as util]
      [mpt.subs      :as subs]
-     [reagent.dom   :as rdom]
      [re-frame.core :as rf]
      [reagent.core  :as r]))
 
@@ -78,15 +75,29 @@
    sequence. They go together because they are intrinsically tied, ie. min
    must remain lower than max and max higher than min."
   []
-  (let [minn @(rf/subscribe [::subs/nested-value [:config :sequencer :min]])
-        maxx @(rf/subscribe [::subs/nested-value [:config :sequencer :max]])]
+  (let [options @(rf/subscribe [::subs/sequencer-options])
+        minn     (options :min)
+        maxx     (options :max)]
     [:div (sx :.flex-row-se :ai--c)
      [input (sx {:-label "Min:"
-                 :value minn :min 1 :max maxx :type :number
-                 :on-change #(rf/dispatch [::events/set-numeric-config [:config :sequencer :min] (-> % .-target .-value)])})]
+                 :value minn :min 1 :max (dec maxx) :type :number
+                 :on-change (fn [e]
+                              (rf/dispatch [::events/set-numeric-config [:config :sequencer :min] (-> e .-target .-value)])
+                              (rf/dispatch [::events/enforce-max-length]))})]
      [input (sx {:-label "Max:"
-                 :value maxx :min minn :max 15 :type :number
-                 :on-change #(rf/dispatch [::events/set-numeric-config [:config :sequencer :max] (-> % .-target .-value)])})]]))
+                 :value maxx :min (inc minn) :max 15 :type :number
+                 :on-change (fn [e]
+                              (rf/dispatch [::events/set-numeric-config [:config :sequencer :max] (-> e .-target .-value)])
+                              (rf/dispatch [::events/enforce-max-length]))})]]))
+
+(defn sequencer-len-dups
+  []
+  (let [options @(rf/subscribe [::subs/sequencer-options])]
+    [:div (sx :.flex-row-se :ai--c)
+     [numeric-input "Length:"
+      1 (min 10 @(rf/subscribe [::subs/max-length-possible]))
+      [:config :sequencer :len]]
+     [numeric-input "Duplicates: " 1 5 [:config :sequencer :dups]]]))
 
 (defn expression-source
   []
@@ -107,6 +118,8 @@
        (when @show-text?
          [:p (sx :.medium :.oblique {:style {:position :relative :top "1.5rem"}})
           "Expressions updated."])])))
+
+;; References
 
 (def setting->title
   {:expression-source [:h3 (sx :.bold) "Change Attribute:"]
@@ -131,12 +144,10 @@
    :alert-on-complete?  [switch-toggle "Alert when all keys completed?" :alert-on-complete? :alert-on-complete?]
    :sequencer-min-max   [sequencer-min-max]
    :sequencer-delimiter [:div (sx :w--25% :mi--auto)
-                         [string-input  "Delimiter:"   [:config :sequencer :delimiter]]]
-   :sequencer-len-dups  [:div (sx :.flex-row-se :ai--c)
-                         [numeric-input "Length:" 1 10 [:config :sequencer :len]]
-                         [numeric-input "Duplicates: " 1 5 [:config :sequencer :dups]]]
+                         [string-input "Delimiter:"   [:config :sequencer :delimiter]]]
+   :sequencer-len-dups  [sequencer-len-dups]
    :use-roman-numerals? [switch-toggle "Use Roman Numerals" :use-roman-numerals? :use-roman-numerals?]
-   :vary-roman-case?    [switch-toggle "Mixed Case?" :vary-roman-case? :vary-roman-case?]
+   :vary-roman-case?    [switch-toggle "Mixed Case?"        :vary-roman-case?    :vary-roman-case?]
    })
 
 (defn setting->input
