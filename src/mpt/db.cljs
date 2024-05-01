@@ -30,7 +30,9 @@
                           :seen     #{}} ;; This value is a set containing all keys already used.
             :expression  {:sources #{:mood}
                           :seen    #{}}
-            :use-sharps?        false   ;; Use sharps instead of flats for keys
-            :alert-on-complete? true    ;; Pops an alert when user completes all keys
-           }
+            :use-sharps?         false   ;; Use sharps instead of flats for keys
+            :alert-on-complete?  true    ;; Pops an alert when user completes all keys
+            :use-roman-numerals? false   ;; use roman numerals to display sequences
+            :vary-roman-case?    false   ;; vary the case of the roman numerals
+            }
   })

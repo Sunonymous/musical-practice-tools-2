@@ -1,16 +1,15 @@
 (ns tools.sequencer.core
   (:require [clojure.string :as str]
+            [re-frame.core  :as rf]
+            [mpt.subs       :as subs]
             [mpt.db :refer [default-sequencer-options]]))
 
+(def roman-numerals ["-" "I" "II" "III" "IV" "V" "VI" "VII" "VIII" "IX" "X" "XI" "XII" "XIII" "XIV" "XV"])
 
 ;; this allows options argument to be incomplete, ie. not containing all the keys needed
 (defn- or-default
   [options]
   (merge default-sequencer-options options))
-
-(defn rand-int-between
-  [min max] ;; exclusive max
-  (+ min (rand-int max)))
 
 (defn- shuffle-range
   [options]
@@ -42,4 +41,10 @@
          result (if (= 1 (:dups options))
                   (shuffle-range  full-opts)
                   (build-sequence full-opts))]
-     (str/join (options :delimiter) result))))
+     (str/join (options :delimiter) (cond->> result
+                                     @(rf/subscribe [::subs/config-boolean :use-roman-numerals?])
+                                      (map #(roman-numerals %))
+                                      true ;; cast to str in case the next function needs to be run
+                                      (map str) ;; (it fails on numbers)
+                                     @(rf/subscribe [::subs/config-boolean :vary-roman-case?])
+                                      (map #((rand-nth [str/upper-case str/lower-case]) %)))))))

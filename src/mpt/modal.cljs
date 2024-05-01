@@ -116,7 +116,9 @@
    :alert-on-complete?  nil
    :sequencer-min-max   nil
    :sequencer-len-dups  nil
-   :sequencer-delimiter nil})
+   :sequencer-delimiter nil
+   :use-roman-numerals? nil
+   :vary-roman-case?    nil})
 
 (def setting->component
   {:expression-source   [expression-source]
@@ -133,6 +135,8 @@
    :sequencer-len-dups  [:div (sx :.flex-row-se :ai--c)
                          [numeric-input "Length:" 1 10 [:config :sequencer :len]]
                          [numeric-input "Duplicates: " 1 5 [:config :sequencer :dups]]]
+   :use-roman-numerals? [switch-toggle "Use Roman Numerals" :use-roman-numerals? :use-roman-numerals?]
+   :vary-roman-case?    [switch-toggle "Mixed Case?" :vary-roman-case? :vary-roman-case?]
    })
 
 (defn setting->input
@@ -144,7 +148,7 @@
      (get setting->component setting [:p "COMPONENT NOT FOUND FOR SETTING " setting])])
 
 (def toolkw->settings
-  {:sequencer  [:sequencer-min-max :sequencer-len-dups :sequencer-delimiter #_:use-roman-numerals?] ;; TODO re-enable once implemented
+  {:sequencer  [:sequencer-min-max :sequencer-len-dups :sequencer-delimiter :use-roman-numerals? :vary-roman-case?]
    :toggler    [:toggler-values]
    :key        [:key-editor :use-sharps? #_:alert-on-complete?] ;; TODO re-enable once implemented
    :expression [:expression-source]})
