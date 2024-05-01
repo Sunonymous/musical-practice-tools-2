@@ -13,7 +13,7 @@
 
 (defn- shuffle-range
   [options]
-  (->> (range (options :min) (options :max))
+  (->> (range (options :min) (inc (options :max)))
        shuffle
        (take (options :len))))
 
@@ -27,7 +27,7 @@
     (loop [next-sq []]
       (if (= (options :len) (count next-sq))
         next-sq
-        (let [full-range  (doall (range (options :min) (options :max))) ;; is doall needed?
+        (let [full-range  (doall (range (options :min) (inc (options :max)))) ;; is doall needed?
               frequencies (frequencies next-sq)
               possibles   (remove #(at-limit? frequencies (options :dups) %) full-range)
               next-number (rand-nth possibles)]
