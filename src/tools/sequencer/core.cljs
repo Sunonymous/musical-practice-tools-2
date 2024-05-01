@@ -1,22 +1,12 @@
 (ns tools.sequencer.core
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [mpt.db :refer [default-sequencer-options]]))
 
-;; Sequencer generates sequences with the following responsibilities:
-
-(def default-options
-  {:delimiter ", " ;; string to separate number
-   :min       1    ;; lowest possible value
-   :max       8    ;; highest possible value
-   :len       4    ;; length of sequence
-   :sort      nil  ;; sort may be < or >     ;; TODO implement sorting
-   :dups      1})  ;; dups key is the limit of duplicate nums in the sequence.
-                   ;; dups of 1 means each number is unique, 2 means that each number
-                   ;;   may appear twice, and so on
 
 ;; this allows options argument to be incomplete, ie. not containing all the keys needed
 (defn- or-default
   [options]
-  (merge default-options options))
+  (merge default-sequencer-options options))
 
 ;; need function to calculate potential length of sequence range * duplicates allowed
 (defn highest-potential-length
@@ -51,7 +41,7 @@
 
 ;; The public function used to generate a sequence of numbers.
 (defn generate!
-  ([] (generate! default-options))
+  ([] (generate! default-sequencer-options))
   ([options]
    (let [full-opts (or-default options)
          result (if (= 1 (:dups options))

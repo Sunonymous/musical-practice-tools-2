@@ -17,7 +17,17 @@
      (get values index :error!))))
 
 (rf/reg-sub
+ ::toggler-values
+ (fn [db] (get-in db [:config :toggler])))
+
+(rf/reg-sub
  ::key (fn [db] (get-in db [:music :key])))
+
+(rf/reg-sub
+ ::excluded-keys (fn [db] (get-in db [:config :key :excluded])))
+
+(rf/reg-sub
+ ::seen-keys (fn [db] (get-in db [:config :key :seen])))
 
 (rf/reg-sub
  ::expression (fn [db] (get-in db [:music :expression])))
@@ -56,6 +66,14 @@
  ::is-synced?
  (fn [[_ tool]] (rf/subscribe [::synced-tools]))
  (fn [tools [_ tool]] (tools tool)))
+
+(rf/reg-sub
+ ::config-boolean
+ (fn [db [_ config-kw]] (get-in db [:config config-kw])))
+
+(rf/reg-sub     ;; honestly, strange naming here. it's because I inadvertently
+ ::nested-value ;; spread out where configuration is placed within db
+ (fn [db [_ db-path]] (get-in db db-path :NOT-FOUND)))
 
 (rf/reg-sub ;; for debugging purposes!
  ::full (fn [db] db))

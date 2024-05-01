@@ -5,17 +5,16 @@
    [kushi.ui.card.core         :refer [card]         ]
    [kushi.ui.button.core       :refer [button]       ]
    [kushi.ui.icon.core         :refer [icon]         ]
-   [kushi.ui.input.text.core   :refer [input]        ]
    [kushi.ui.input.switch.core :refer [switch]       ]
    [kushi.ui.tooltip.core      :refer [tooltip-attrs]]
-   [tools.toggler.core         :refer [toggler]      ]
-   [tools.twelve-keys.views    :refer [twelve-keys]  ]
    [mpt.metronome        :as metronome]
    [mpt.events           :as events]
+   [mpt.modal            :as modal]
    [reagent.dom          :as rdom]
    [mpt.subs             :as subs]
    [re-frame.core        :as rf]
    [reagent.core         :as r]
+   [clojure.pprint :as pp]
    [mpt.shared-styles]))
 
 (add-google-font! {:family "Inter"
@@ -40,7 +39,8 @@
              :d--f :jc--sa
              :c--black
              :ff--Inter|sans-serif
-             {:style {:flex-wrap "wrap"}})
+             {:style {:flex-wrap   :wrap
+                      :white-space :pre}})
     (when @(rf/subscribe [::subs/is-visible? :sequencer])
       [:p (sx :.display-text) @(rf/subscribe [::subs/sequence])])
     (when @(rf/subscribe [::subs/is-visible? :toggler])
@@ -86,7 +86,8 @@
       [button (sx :.toolmenu-button (when synced? :.filled)
                   {:on-click #(rf/dispatch [::events/toggle-tool-attribute :sync tool-kw])
                    :aria-label (str "Sync " title " with Metronome")})
-       [icon (if synced? :update :update-disabled)]]]])
+       [icon (if synced? :update :update-disabled)]]]
+     [modal/config tool-kw]])
   )
 
 (defn toolsbar
@@ -198,7 +199,9 @@
    [card (sx :.flex-col-c :gap--0.25rem :w--fit-content :pi--2rem :mb--1rem :.rounded)
     [control-buttons]
     [metronome-controls]
-    [sync-controls]]])
+    [sync-controls]]
+   [:pre (pp/pprint @(rf/subscribe [::subs/full]))] ;; TODO remove
+   ])
 
 ;; start is called by init and after code reloading finishes
 (defn ^:dev/after-load start []
