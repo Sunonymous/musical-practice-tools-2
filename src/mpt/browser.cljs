@@ -200,7 +200,6 @@
     [control-buttons]
     [metronome-controls]
     [sync-controls]]
-   [:pre (pp/pprint @(rf/subscribe [::subs/full]))] ;; TODO remove
    ])
 
 ;; start is called by init and after code reloading finishes

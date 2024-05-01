@@ -8,11 +8,6 @@
   [options]
   (merge default-sequencer-options options))
 
-;; need function to calculate potential length of sequence range * duplicates allowed
-(defn highest-potential-length
-  [options]
-  42) ;; TODO implement
-
 (defn rand-int-between
   [min max] ;; exclusive max
   (+ min (rand-int max)))

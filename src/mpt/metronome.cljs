@@ -43,8 +43,6 @@
                                   ;; and may or may not have played yet. {note, time}
 
 
-;; TODO: add this to init()?
-
 ;; First, let's shim the requestAnimationFrame API, with a setTimeout fallback
 (aset js/window "requestAnimFrame"
       ((fn []
