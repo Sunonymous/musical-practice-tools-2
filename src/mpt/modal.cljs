@@ -60,16 +60,6 @@
             :value     @(rf/subscribe [::subs/nested-value db-path])
             :on-change #(rf/dispatch  [::events/set-numeric-config db-path (-> % .-target .-value)])}]])
 
-(def setting->title
-  {:expression-source [:h3 (sx :.bold) "Change Attribute:"]
-   :toggler-values    [:h3 (sx :.bold) "Values to select from:"]
-   :key-editor        [:h3 (sx :.bold) "Key Editor"]
-   :use-sharps?         nil ;; If nil, has its own label
-   :alert-on-complete?  nil
-   :sequencer-min-max   nil
-   :sequencer-len-dups  nil
-   :sequencer-delimiter nil})
-
 (defn values-config-component
   []
   (let [values  @(rf/subscribe [::subs/toggler-values])
@@ -117,6 +107,16 @@
        (when @show-text?
          [:p (sx :.medium :.oblique {:style {:position :relative :top "1.5rem"}})
           "Expressions updated."])])))
+
+(def setting->title
+  {:expression-source [:h3 (sx :.bold) "Change Attribute:"]
+   :toggler-values    [:h3 (sx :.bold) "Values to select from:"]
+   :key-editor        [:h3 (sx :.bold) "Key Editor"]
+   :use-sharps?         nil ;; If nil, has its own label
+   :alert-on-complete?  nil
+   :sequencer-min-max   nil
+   :sequencer-len-dups  nil
+   :sequencer-delimiter nil})
 
 (def setting->component
   {:expression-source   [expression-source]
