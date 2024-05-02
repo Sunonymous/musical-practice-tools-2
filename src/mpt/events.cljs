@@ -78,10 +78,11 @@
 
 (rf/reg-event-db
  ::generate!
- (fn [{:keys [sync lock] :as db} [_ on-sync?]]
+ (fn [{:keys [sync lock show] :as db} [_ on-sync?]]
    (let [generate? #(and (if on-sync?
                            (sync %)
                            true)
+                         (show %)
                          (not (lock %)))]
      (cond-> db
        (generate? :sequencer)
