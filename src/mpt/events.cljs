@@ -33,9 +33,10 @@
 (defn next-key
   [db]
   (when-not ((db :lock) :key)
-    (let [old-keys       (get-in db [:config :key :seen])
+    (let [use-sharps?    (get-in db [:config :use-sharps?])
+          old-keys       (get-in db [:config :key :seen])
           excluded-keys  (get-in db [:config :key :excluded])
-          full-keys      (remove excluded-keys (if (db :config :use-sharps?)
+          full-keys      (remove excluded-keys (if use-sharps?
                                                  db/musical-keys-with-sharps
                                                  db/musical-keys-with-flats))
           potential-keys (remove old-keys full-keys)]
