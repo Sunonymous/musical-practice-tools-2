@@ -31,25 +31,28 @@
     [:div (sx :w--90%
               :.full-rounded
               :mb--1rem
-              :p--2rem
+              :p--0.5rem:1rem
               :bgc--white)
-     [:div (sx :.full-slight-rounded
-               :b--1px:solid:#efefef
-               :pi--2rem
-               :pb--2rem
-               :d--f :jc--sa
-               :c--black
-               :ff--Inter|sans-serif
-               {:style {:flex-wrap   :wrap
-                        :white-space :pre}})
-      (when @(rf/subscribe [::subs/is-visible? :sequencer])
-        [:p (sx :.display-text) @(rf/subscribe [::subs/sequence])])
-      (when @(rf/subscribe [::subs/is-visible? :toggler])
-        [:p (sx :.display-text) @(rf/subscribe [::subs/toggler])])
+     (when (empty? @(rf/subscribe [::subs/visible-tools]))
+       [:p (sx :ta--c :.display-text) "Activate a tool to get started."])
+     [:div (sx :ta--c :.flex-row-sb :ai--fe)
       (when @(rf/subscribe [::subs/is-visible? :key])
-        [:p (sx :.display-text) @(rf/subscribe [::subs/key])])
+        [:div
+         (sx :mie--auto :w--fit-content)
+         [:p "Key:"]
+         [:p (sx :.display-text {:style {:justify-self :flex-start}})
+          @(rf/subscribe [::subs/key])]])
       (when @(rf/subscribe [::subs/is-visible? :expression])
-        [:p (sx :.display-text) @(rf/subscribe [::subs/expression])])]
+        [:div (sx :mis--auto :w--fit-content)
+         [:p "Expression:"]
+         [:p (sx :.display-text {:style {:justify-self :flex-end}})
+          @(rf/subscribe [::subs/expression])]])]
+     (when @(rf/subscribe [::subs/is-visible? :sequencer])
+       [:p (sx :ta--c :.xlarge :.bold {:style {:white-space :pre}})
+        @(rf/subscribe [::subs/sequence])])
+     (when @(rf/subscribe [::subs/is-visible? :toggler])
+       [:div (sx :mi--auto :w--fit-content {:style {:margin-top :auto}})
+        [:p (sx :.large :.bold) @(rf/subscribe [::subs/toggler])]])
      (let [remaining-beats @(rf/subscribe [::subs/remaining-beats])]
        [:p (sx :p--relative :pb--0.25rem :.small :.oblique :ta--right
                {:style {:visibility (if (and (@metronome/state :isPlaying)
@@ -108,10 +111,10 @@
   "Contains all the tool-menu components for each individual tool."
   []
   [:div (sx :.absolute {:style {:top :25% :left :8px}})
-   [tool-menu "Sequencer"  :sequencer]
-   [tool-menu "Toggler"    :toggler]
    [tool-menu "Key"        :key]
    [tool-menu "Expression" :expression]
+   [tool-menu "Sequencer"  :sequencer]
+   [tool-menu "Toggler"    :toggler]
    ])
 
 (defn control-buttons
@@ -186,12 +189,11 @@
        (sx :.control-group :gap--0.5rem)
        [:p "Change every"]
        [:input (sx :w--3rem :b--1px:solid:black :ta--c
-                   {:type :number
-                    :min 1
+                   {:type :number :min 1
                     :style {:align-self :flex-start}
                     :on-change (fn [e]
                                  (let [parsed-num (-> e .-target .-value js/parseInt)]
-                                   (reset! number  (if (js/isNaN parsed-num) 1 parsed-num))
+                                   (reset! number (if (js/isNaN parsed-num) 1 parsed-num))
                                    (update-cap (total-beats*))))
                     :value @number})]
        [switch
