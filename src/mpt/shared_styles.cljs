@@ -22,7 +22,8 @@
   :ai--c)
 
 (defclass toolmenu-button
-  :.pill :.small :.semi-bold)
+  :bgc--$gray-350 :.pill :.medium :.semi-bold :.neutral :b--1px:solid:transparent
+  :hover:bgc--$gray-750 :hover:c--white)
 
 (defclass metronome-button
   :.filled :.pill :.small :.semi-bold :bgc--gray)

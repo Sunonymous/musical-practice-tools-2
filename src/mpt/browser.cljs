@@ -27,36 +27,37 @@
   "The main view of the description of the music
    which should be played. Sits at the top of the screen."
   []
-  [:div (sx :w--90%
-            :.full-rounded
-            :mb--1rem
-            :p--2rem
-            :bgc--white)
-   [:div (sx :.full-slight-rounded
-             :b--1px:solid:#efefef
-             :pi--2rem
-             :pb--4rem
-             :d--f :jc--sa
-             :c--black
-             :ff--Inter|sans-serif
-             {:style {:flex-wrap   :wrap
-                      :white-space :pre}})
-    (when @(rf/subscribe [::subs/is-visible? :sequencer])
-      [:p (sx :.display-text) @(rf/subscribe [::subs/sequence])])
-    (when @(rf/subscribe [::subs/is-visible? :toggler])
-      [:p (sx :.display-text) @(rf/subscribe [::subs/toggler])])
-    (when @(rf/subscribe [::subs/is-visible? :key])
-      [:p (sx :.display-text) @(rf/subscribe [::subs/key])])
-    (when @(rf/subscribe [::subs/is-visible? :expression])
-      [:p (sx :.display-text) @(rf/subscribe [::subs/expression])])]
-   (let [remaining-beats @(rf/subscribe [::subs/remaining-beats])]
-     [:p (sx :p--relative :pb--0.25rem :.small :.oblique :ta--right
-             {:style {:visibility (if (and (@metronome/state :isPlaying)
-                                           (seq @(rf/subscribe [::subs/synced-tools])))
-                                    :visible :hidden)}})
-      (if (= remaining-beats 1)
-        "New generation on next beat."
-        (str "New generation in " remaining-beats " beats."))])])
+  (let [tools-synced @(rf/subscribe [::subs/synced-tools])]
+    [:div (sx :w--90%
+              :.full-rounded
+              :mb--1rem
+              :p--2rem
+              :bgc--white)
+     [:div (sx :.full-slight-rounded
+               :b--1px:solid:#efefef
+               :pi--2rem
+               :pb--2rem
+               :d--f :jc--sa
+               :c--black
+               :ff--Inter|sans-serif
+               {:style {:flex-wrap   :wrap
+                        :white-space :pre}})
+      (when @(rf/subscribe [::subs/is-visible? :sequencer])
+        [:p (sx :.display-text) @(rf/subscribe [::subs/sequence])])
+      (when @(rf/subscribe [::subs/is-visible? :toggler])
+        [:p (sx :.display-text) @(rf/subscribe [::subs/toggler])])
+      (when @(rf/subscribe [::subs/is-visible? :key])
+        [:p (sx :.display-text) @(rf/subscribe [::subs/key])])
+      (when @(rf/subscribe [::subs/is-visible? :expression])
+        [:p (sx :.display-text) @(rf/subscribe [::subs/expression])])]
+     (let [remaining-beats @(rf/subscribe [::subs/remaining-beats])]
+       [:p (sx :p--relative :pb--0.25rem :.small :.oblique :ta--right
+               {:style {:visibility (if (and (@metronome/state :isPlaying)
+                                             (seq tools-synced))
+                                      :visible :hidden)}})
+        (if (= remaining-beats 1)
+          "New generation on next beat."
+          (str "New generation in " remaining-beats " beats."))])]))
 
 (def tools->gen-event
   {:sequencer  ::events/next-sequence
@@ -70,32 +71,43 @@
   (let [visible? @(rf/subscribe [::subs/is-visible? tool-kw])
         locked?  @(rf/subscribe [::subs/is-locked?  tool-kw])
         synced?  @(rf/subscribe [::subs/is-synced?  tool-kw])]
-    [card (sx :w--fit-content :mb--1rem :.rounded)
-     [:span (sx :.medium :.bold) title]
-     [:div (sx :d--f :pb--0.5rem {:style {:gap "8px"}})
-      [button (sx :.toolmenu-button (when visible? :.filled)
-                  {:on-click #(rf/dispatch [::events/toggle-tool-attribute :show tool-kw])
-                   :aria-label (str "Show or Hide " title)})
-       [icon (if visible? :visibility :visibility-off)]]
-      [button (sx :.toolmenu-button (when locked? :.filled)
-                  {:on-click #(rf/dispatch [::events/toggle-tool-attribute :lock tool-kw])
-                   :aria-label (str "Lock " title)})
-       [icon (if locked? :lock :lock-open)]]
-      [button (sx :.toolmenu-button
-                  {:on-click #(rf/dispatch [(tools->gen-event tool-kw)])
-                   :aria-label (str "Generate " title)})
-       [icon :autorenew]]
-      [button (sx :.toolmenu-button (when synced? :.filled)
-                  {:on-click #(rf/dispatch [::events/toggle-tool-attribute :sync tool-kw])
-                   :aria-label (str "Sync " title " with Metronome")})
-       [icon (if synced? :update :update-disabled)]]]
-     [modal/config tool-kw]])
+    [:div (sx {:style {:margin-bottom :0.5rem}})
+      [:p (sx :c--white :.medium :.extra-bold) title]
+     [:div (sx :bgc--white :w--fit-content :p--0.25rem:0.5rem :mb--0.25rem
+               {:style {:margin-left :-1rem
+                        :padding-left :1rem
+                        :border-radius "0 16px 16px 0"}})
+      [:div (sx :d--f :pb--0.25rem :gap--8px )
+       [button (sx :.toolmenu-button (when visible? :.filled)
+                   {:on-click  #(rf/dispatch [::events/toggle-tool-attribute :show tool-kw])
+                    :aria-label (str "Show or Hide " title)})
+        [icon (sx :.large) (if visible? :visibility :visibility-off)]]
+       (when visible?
+         [button (sx :.toolmenu-button (when locked? :.filled)
+                     {:on-click (fn [_]
+                                  (rf/dispatch [::events/toggle-tool-attribute :lock tool-kw])
+                                  (when synced? (rf/dispatch [::events/toggle-tool-attribute :sync tool-kw])))
+                      :aria-label (str "Lock " title)})
+          [icon (if locked? :lock :lock-open)]])
+       (when visible?
+         [button (sx :.toolmenu-button
+                     {:disabled   locked?
+                      :on-click  #(rf/dispatch [(tools->gen-event tool-kw)])
+                      :aria-label (str "Generate " title)})
+          [icon :autorenew]])
+       (when visible?
+         [button (sx :.toolmenu-button (when synced? :.filled)
+                     {:disabled   locked?
+                      :on-click  #(rf/dispatch [::events/toggle-tool-attribute :sync tool-kw])
+                      :aria-label (str "Sync " title " with Metronome")})
+          [icon (if synced? :update :update-disabled)]])
+       [modal/config tool-kw]]]])
   )
 
 (defn toolsbar
   "Contains all the tool-menu components for each individual tool."
   []
-  [:div (sx :d--f :jc--c {:style {:flex-wrap "wrap" :gap "1rem"}})
+  [:div (sx :.absolute {:style {:top :25% :left :8px}})
    [tool-menu "Sequencer"  :sequencer]
    [tool-menu "Toggler"    :toggler]
    [tool-menu "Key"        :key]
@@ -175,9 +187,12 @@
        [:p "Change every"]
        [:input (sx :w--3rem :b--1px:solid:black :ta--c
                    {:type :number
+                    :min 1
                     :style {:align-self :flex-start}
-                    :on-change (fn [e] (reset! number (-> e .-target .-value js/parseInt))
-                                 (update-cap (total-beats*)))
+                    :on-change (fn [e]
+                                 (let [parsed-num (-> e .-target .-value js/parseInt)]
+                                   (reset! number  (if (js/isNaN parsed-num) 1 parsed-num))
+                                   (update-cap (total-beats*))))
                     :value @number})]
        [switch
         (sx
