@@ -18,7 +18,7 @@
 (def default-db
   {:audio-context (js/AudioContext.)    ;; JS AudioContext object. Initialized on page load.
    :music {:sequence "1, 2, 3" :key "A" ;; Current iteration of the generations.
-           :toggler  0  :expression "Beautifully"}
+           :toggler  0  :expression "beautifully"}
    :show  #{}                           ;; Set containing the tools shown in display.
    :lock  #{}                           ;; Set containing the tools which should not regenerate.
    :sync  #{}                           ;; Set containing the tools which regenerate on bar.
