@@ -174,7 +174,7 @@
     [:div
      [button
       (sx :.toolmenu-button {:on-click #(open-kushi-modal modal-id)})
-      [icon :settings]]
+      [icon (sx :.large {:-icon-filled? true }) :settings]]
      [modal
       (sx
        :border-radius--24px
