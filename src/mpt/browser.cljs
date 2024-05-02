@@ -51,7 +51,9 @@
       [:p (sx :.display-text) @(rf/subscribe [::subs/expression])])]
    (let [remaining-beats @(rf/subscribe [::subs/remaining-beats])]
      [:p (sx :p--relative :pb--0.25rem :.small :.oblique :ta--right
-             {:style {:visibility (if (@metronome/state :isPlaying) :visible :hidden)}})
+             {:style {:visibility (if (and (@metronome/state :isPlaying)
+                                           (seq @(rf/subscribe [::subs/synced-tools])))
+                                    :visible :hidden)}})
       (if (= remaining-beats 1)
         "New generation on next beat."
         (str "New generation in " remaining-beats " beats."))])])
