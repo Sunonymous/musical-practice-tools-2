@@ -32,10 +32,13 @@
 
 (defn numeric-input
   [label minimum maximum db-path]
-  [input (sx {:value @(rf/subscribe [::subs/nested-value db-path])
-              :type :number :min minimum :max maximum
-              :-label label
-              :on-change #(rf/dispatch [::events/set-numeric-config db-path (-> % .-target .-value)])})])
+  (let [user-str (r/atom @(rf/subscribe [::subs/nested-value db-path]))]
+    (fn [label minimum maximum db-path]
+      [input (sx {:value @user-str
+                  :type :number :min minimum :max maximum
+                  :-label label
+                  :on-change #(reset! user-str (-> % .-target .-value))
+                  :on-blur   #(rf/dispatch [::events/set-numeric-config db-path @user-str])})])))
 
 (defn string-input
   "This component allows configuration of a string value. It is a form-2 component
