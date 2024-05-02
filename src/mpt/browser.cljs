@@ -23,44 +23,73 @@
 
 ;; Application Components and Tools
 
+(defn generation-warning
+  "A component displaying text about when the next generation
+   will occur. Only appears when the metronome is playing
+   and at least one tool is synchronized to it."
+  []
+  (let [remaining-beats @(rf/subscribe [::subs/remaining-beats])
+        tools-visible?   (seq @(rf/subscribe [::subs/visible-tools]))
+        tools-synced?    (seq @(rf/subscribe [::subs/synced-tools]))]
+    [:p (sx :c--white  :.relative :.small :.oblique :ta--right
+            {:style {:top "2.5rem" :left "0px"
+                     :user-select  :none
+                     :transition   "opacity 0.5s"
+                     :opacity (if (and (@metronome/state :isPlaying)
+                                       tools-synced?
+                                       tools-visible?)
+                                1 0)}})
+     (if (= remaining-beats 1)
+       "New generation on next beat."
+       (str "New generation in " remaining-beats " beats."))]))
+
+;; may show multiple components until the user toggles a tool
+(defonce show-starting-text (r/atom true))
+
+(defn starting-text
+  "A short message appearing to guide the user to activate a tool
+   to begin."
+  []
+  [:p (sx :.center :c--white :ta--c :.large :.xloose
+          :.absolute {:style {:opacity (if @show-starting-text 1 0)
+                              :transition "opacity 0.5s"}})
+   "<- Activate a tool to get started."])
+
 (defn display-panel
   "The main view of the description of the music
    which should be played. Sits at the top of the screen."
   []
-  (let [tools-synced @(rf/subscribe [::subs/synced-tools])]
-    [:div (sx :w--90%
-              :.full-rounded
-              :mb--1rem
-              :p--0.5rem:1rem
-              :bgc--white)
-     (when (empty? @(rf/subscribe [::subs/visible-tools]))
-       [:p (sx :ta--c :.display-text) "Activate a tool to get started."])
-     [:div (sx :ta--c :.flex-row-sb :ai--fe)
-      (when @(rf/subscribe [::subs/is-visible? :key])
-        [:div
-         (sx :mie--auto :w--fit-content)
-         [:p "Key:"]
-         [:p (sx :.display-text {:style {:justify-self :flex-start}})
-          @(rf/subscribe [::subs/key])]])
-      (when @(rf/subscribe [::subs/is-visible? :expression])
-        [:div (sx :mis--auto :w--fit-content)
-         [:p "Expression:"]
-         [:p (sx :.display-text {:style {:justify-self :flex-end}})
-          @(rf/subscribe [::subs/expression])]])]
-     (when @(rf/subscribe [::subs/is-visible? :sequencer])
-       [:p (sx :ta--c :.xlarge :.bold {:style {:white-space :pre}})
-        @(rf/subscribe [::subs/sequence])])
-     (when @(rf/subscribe [::subs/is-visible? :toggler])
-       [:div (sx :mi--auto :w--fit-content {:style {:margin-top :auto}})
-        [:p (sx :.large :.bold) @(rf/subscribe [::subs/toggler])]])
-     (let [remaining-beats @(rf/subscribe [::subs/remaining-beats])]
-       [:p (sx :p--relative :pb--0.25rem :.small :.oblique :ta--right
-               {:style {:visibility (if (and (@metronome/state :isPlaying)
-                                             (seq tools-synced))
-                                      :visible :hidden)}})
-        (if (= remaining-beats 1)
-          "New generation on next beat."
-          (str "New generation in " remaining-beats " beats."))])]))
+  [:div (sx :w--90%
+            :.full-rounded
+            :mb--1rem
+            :p--0.5rem:1rem
+            :bgc--white
+            {:style {:transition "background-color 0.5s"}})
+
+   [:div (sx :ta--c :.flex-row-sb :ai--fe)
+    [:div (sx :mie--auto :ai--fs :w--fit-content
+              {:style {:opacity (if @(rf/subscribe [::subs/is-visible? :key]) 1 0)
+                       :transition "opacity 0.25s"}})
+     [:p "Key:"]
+     [:p (sx :.display-text {:style {:justify-self :flex-start}})
+      @(rf/subscribe [::subs/key])]]
+    [:div (sx :mis--auto :mbe--auto :w--fit-content
+              {:style {:opacity (if @(rf/subscribe [::subs/is-visible? :expression]) 1 0)
+                       :transition "opacity 0.25s"}})
+     [:p "Expression:"]
+     [:p (sx :.large :.bold
+             {:style {:justify-self :flex-end}})
+      @(rf/subscribe [::subs/expression])]]]
+   [:p (sx :ta--c :.xlarge :.bold
+           {:style {:white-space :pre
+                    :opacity (if @(rf/subscribe [::subs/is-visible? :sequencer]) 1 0)
+                    :transition "opacity 0.25s"}})
+    @(rf/subscribe [::subs/sequence])]
+   [:div (sx :mi--auto :w--fit-content
+             {:style {:margin-top :auto
+                      :opacity (if @(rf/subscribe [::subs/is-visible? :toggler]) 1 0)
+                      :transition "opacity 0.25s"}})
+    [:p (sx :.large :.bold) @(rf/subscribe [::subs/toggler])]]])
 
 (def tools->gen-event
   {:sequencer  ::events/next-sequence
@@ -80,9 +109,11 @@
                {:style {:margin-left :-1rem
                         :padding-left :1rem
                         :border-radius "0 16px 16px 0"}})
-      [:div (sx :d--f :pb--0.25rem :gap--8px )
+      [:div (sx :d--f :pis--0.5rem :pb--0.25rem :gap--8px )
        [button (sx :.toolmenu-button (when visible? :.filled)
-                   {:on-click  #(rf/dispatch [::events/toggle-tool-attribute :show tool-kw])
+                   {:on-click  (fn [_] ;; disable that starting text
+                                 (rf/dispatch [::events/toggle-tool-attribute :show tool-kw])
+                                 (reset! show-starting-text false))
                     :aria-label (str "Show or Hide " title)})
         [icon (sx :.large) (if visible? :visibility :visibility-off)]]
        (when visible?
@@ -110,12 +141,11 @@
 (defn toolsbar
   "Contains all the tool-menu components for each individual tool."
   []
-  [:div (sx :.absolute {:style {:top :25% :left :8px}})
+  [:div (sx {:style {:align-self :flex-start}})
    [tool-menu "Key"        :key]
    [tool-menu "Expression" :expression]
    [tool-menu "Sequencer"  :sequencer]
-   [tool-menu "Toggler"    :toggler]
-   ])
+   [tool-menu "Toggler"    :toggler]])
 
 (defn control-buttons
   "These buttons rest at the bottom of the screen
@@ -206,19 +236,26 @@
                       (swap! bars? not)
                       (update-cap (total-beats*)))})]])))
 
+(defn control-card
+  "Stitches together controls for metronome, generation, and sync."
+  []
+  [card (sx :w--fit-content :.flex-col-c :gap--0.25rem
+            :pi--2rem :mb--1rem :.rounded
+            {:style {:align-self :flex-end}})
+   [control-buttons]
+   [metronome-controls]
+   [sync-controls]])
+
 (defn main-view []
   [:div
-   (sx :d--flex
-       :w--100%
-       :.flex-col-c
-       :ai--c)
+   (sx :w--100% :.flex-col-c :ai--c
+       {:style {:overflow :hidden}})
    [display-panel]
-   [toolsbar]
+   [starting-text]
+   [generation-warning]
    [:canvas#metrocanvas #_(sx :d--none)]
-   [card (sx :.flex-col-c :gap--0.25rem :w--fit-content :pi--2rem :mb--1rem :.rounded)
-    [control-buttons]
-    [metronome-controls]
-    [sync-controls]]
+   [toolsbar]
+   [control-card]
    ])
 
 ;; start is called by init and after code reloading finishes

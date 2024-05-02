@@ -22,11 +22,11 @@
   :ai--c)
 
 (defclass toolmenu-button
-  :bgc--$gray-350 :.pill :.medium :.semi-bold :.neutral :b--1px:solid:transparent
+  :bgc--$gray-350 :.full-rounded :.medium :.semi-bold :.neutral :b--1px:solid:transparent
   :hover:bgc--$gray-750 :hover:c--white)
 
 (defclass metronome-button
   :.filled :.pill :.small :.semi-bold :bgc--gray)
 
 (defclass display-text
-  :.xxlarge :.bold :.black)
+  :.xxlarge :.bold)

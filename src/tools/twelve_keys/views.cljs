@@ -25,7 +25,11 @@
             selected-seen?     (seen-keys @selected-key)]
         [:div
          [:div
-          (sx :d--f)
+          (sx :d--f :jc--c :b--1px:solid:$gray-300
+              :pb--0.25rem
+              {:style {:flex-wrap :wrap
+                       :row-gap :12px
+                       :border-radius :16px}})
           (for [key all-keys]
             (let [active?   (= key current-key)
                   excluded? (excluded-keys key)
@@ -46,13 +50,17 @@
                     :style {:outline (if (= key @selected-key) "2px solid black" "none")}})
                key]))]
          [:p (sx :mb--1rem :.oblique :ta--c) "Selected: " @selected-key]
-         [:div (sx :.flex-row-se)
+         [:div (sx :.flex-row-se {:style {:flex-wrap :wrap
+                                          :row-gap :12px}})
           [button (sx {:on-click #(rf/dispatch [::events/toggle-exclude-key @selected-key])})
-           (if selected-excluded? "Include" "Exclude")]
+           (if selected-excluded?
+             "Include" "Exclude")]
           [button (sx {:on-click #(rf/dispatch [::events/toggle-seen-key @selected-key])})
-           (if selected-seen? "Un-complete" "Complete")]
+           (if selected-seen?
+             "Un-complete" "Complete")]
           (when-not selected-excluded?
             [button (sx {:on-click #(rf/dispatch [::events/focus-key @selected-key])})
              "Focus"])
-          [button (sx {:on-click #(rf/dispatch [::events/reset-keys])}) "Reset"]]
+          [button (sx {:on-click #(rf/dispatch [::events/reset-keys])})
+           "Reset All"]]
          ]))))
