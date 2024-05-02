@@ -173,7 +173,7 @@
   (let [modal-id (str tool-kw "-config")]
     [:div
      [button
-      {:on-click #(open-kushi-modal modal-id)}
+      (sx :.toolmenu-button {:on-click #(open-kushi-modal modal-id)})
       [icon :settings]]
      [modal
       (sx
