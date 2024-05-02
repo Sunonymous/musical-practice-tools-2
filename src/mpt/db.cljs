@@ -4,14 +4,14 @@
 (def musical-keys-with-sharps ["A" "A♯" "B" "C" "C♯" "D" "D♯" "E" "F" "F♯" "G" "G♯" ])
 
 (def default-sequencer-options
-  {:delimiter ", " ;; string to separate number
-   :min       1    ;; lowest possible value
-   :max       8    ;; highest possible value
-   :len       4    ;; length of sequence
-   :sort      nil  ;; sort may be < or >     ;; TODO implement sorting
-   :dups      1})  ;; dups key is the limit of duplicate nums in the sequence.
-                   ;; dups of 1 means each number is unique, 2 means that each number
-                   ;;   may appear twice, and so on
+  {:delimiter "  ->  " ;; string to separate number
+   :min       1        ;; lowest possible value
+   :max       8        ;; highest possible value
+   :len       4        ;; length of sequence
+   :sort      nil      ;; sort may be < or >     ;; TODO implement sorting
+   :dups      1})      ;; dups key is the limit of duplicate nums in the sequence.
+                       ;; dups of 1 means each number is unique, 2 means that each number
+                       ;;   may appear twice, and so on
 
 (defonce default-toggler-values ["Ascending" "Descending"])
 
