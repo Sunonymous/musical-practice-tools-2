@@ -62,14 +62,14 @@
   "A short message appearing to guide the user to activate a tool
    to begin."
   []
-[:div {:style {:opacity (if @show-starting-text 1 0)
-               :transition "opacity 0.5s"
-               :position :absolute
-               :left :1rem :top :25%}}
- [:p (sx :c--white :ta--c :.large :.xloose)
-  "Activate a tool to get started."]
- [:br] ;; animate arrow to droop downwards instead of this
- [icon (sx :.xxxlarge :c--gold) :south]])
+  [:div (sx :d--f {:style {:opacity (if @show-starting-text 1 0)
+                           :position :relative
+                           :left :4.5rem :top :5rem}})
+
+   [icon (sx :.xxxlarge :c--gold) :west]
+   [:br]
+   [:p (sx :.tutorial)
+    "Activate a tool to get started."]])
 
 (defn display-panel
   "The main view of the description of the music
@@ -157,6 +157,7 @@
   "Contains all the tool-menu components for each individual tool."
   []
   [:div (sx {:style {:align-self :flex-start}})
+   [starting-text]
    [tool-menu "Key"        :key]
    [tool-menu "Expression" :expression]
    [tool-menu "Sequencer"  :sequencer]
@@ -266,9 +267,8 @@
    (sx :.flex-col-c :ai--c
        {:style {:overflow :hidden}})
    [display-panel]
-   [starting-text]
    [generation-warning]
-   [:canvas#metrocanvas (sx :h--150px #_:d--none)] ;; arbitrary height
+   [:canvas#metrocanvas (sx  #_:d--none)]
    [toolsbar]
    [control-card]
    (when @show-splash-screen?

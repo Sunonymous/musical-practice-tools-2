@@ -40,3 +40,8 @@ body.dark {background-color: rgb(44, 44, 44);}
   top:       0;
   left:      0;
 }
+
+#metrocanvas {
+  width:  50%;
+  height: 35px;
+}

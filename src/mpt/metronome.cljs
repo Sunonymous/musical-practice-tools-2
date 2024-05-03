@@ -162,7 +162,7 @@
                                 "black"))
             (.fillRect (* x (+ 1 i)) 0
                        (/ x 2)
-                       x))))
+                       (* x 4)))))
       (swap! state assoc :last16thNoteDrawn currentNote))
 
 

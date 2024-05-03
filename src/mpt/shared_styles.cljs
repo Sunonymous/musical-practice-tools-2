@@ -30,3 +30,7 @@
 
 (defclass display-text
   :.xxlarge :.bold)
+
+(defclass tutorial
+  :c--white :b--2px:solid:$gray-250 :bgc--$gray-850
+  :p--0.75rem :.pill :.bold :.loose)
