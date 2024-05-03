@@ -3,6 +3,11 @@ html, body, #app {
   /* width: 100vw; */
 }
 
+#app {
+  width:  100dvw;
+  height: 100dvh;
+}
+
 body {
   margin: 0;
   /* transition: background-color 500ms cubic-bezier(); */
