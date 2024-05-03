@@ -55,9 +55,10 @@
           [button (sx {:on-click #(rf/dispatch [::events/toggle-exclude-key @selected-key])})
            (if selected-excluded?
              "Include" "Exclude")]
-          [button (sx {:on-click #(rf/dispatch [::events/toggle-seen-key @selected-key])})
-           (if selected-seen?
-             "Un-complete" "Complete")]
+          (when-not selected-excluded?
+            [button (sx {:on-click #(rf/dispatch [::events/toggle-seen-key @selected-key])})
+             (if selected-seen?
+               "Un-complete" "Complete")])
           (when-not selected-excluded?
             [button (sx {:on-click #(rf/dispatch [::events/focus-key @selected-key])})
              "Focus"])
