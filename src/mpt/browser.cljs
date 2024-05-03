@@ -50,10 +50,14 @@
   "A short message appearing to guide the user to activate a tool
    to begin."
   []
-  [:p (sx :.center :c--white :ta--c :.large :.xloose
-          :.absolute {:style {:opacity (if @show-starting-text 1 0)
-                              :transition "opacity 0.5s"}})
-   "<- Activate a tool to get started."])
+[:div {:style {:opacity (if @show-starting-text 1 0)
+               :transition "opacity 0.5s"
+               :position :absolute
+               :left :1rem :top :25%}}
+ [:p (sx :c--white :ta--c :.large :.xloose)
+  "Activate a tool to get started."]
+ [:br] ;; animate arrow to droop downwards instead of this
+ [icon (sx :.xxxlarge :c--gold) :south]])
 
 (defn display-panel
   "The main view of the description of the music
