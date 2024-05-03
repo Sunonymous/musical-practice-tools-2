@@ -79,9 +79,7 @@
             :.full-rounded
             :mb--1rem
             :p--0.5rem:1rem
-            :bgc--white
-            {:style {:transition "background-color 0.5s"}})
-
+            :bgc--white)
    [:div (sx :ta--c :.flex-row-sb :ai--fe)
     [:div (sx :mie--auto :ai--fs :w--fit-content
               {:style {:opacity (if @(rf/subscribe [::subs/is-visible? :key]) 1 0)
@@ -270,7 +268,7 @@
    [display-panel]
    [starting-text]
    [generation-warning]
-   [:canvas#metrocanvas #_(sx :d--none)]
+   [:canvas#metrocanvas (sx :h--150px #_:d--none)] ;; arbitrary height
    [toolsbar]
    [control-card]
    (when @show-splash-screen?
