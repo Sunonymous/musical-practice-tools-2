@@ -31,3 +31,21 @@
         maxx (options :max) ;; bad idea to shadow functions with min/max...
         dups (options :dups)]
      (count (mapcat #(repeat dups %) (range minn (inc maxx))))))
+
+(defn clamp
+  "Takes a value, a minimum value, and a maximum value and returns the
+   minimum if the value is lower than the minimum, and the maximum if
+   the value is higher than the maximum, otherwise the value itself."
+  [minn maxx n]
+  (cond
+    (<= minn n maxx)  n
+    :otherwise        (if (< n minn)
+                        minn
+                        maxx)))
+
+(defn if-empty-then
+  [alt s]
+  (if (empty? s)
+    alt
+    s))
+

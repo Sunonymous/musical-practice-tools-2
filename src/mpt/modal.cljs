@@ -32,13 +32,13 @@
 
 (defn numeric-input
   [label minimum maximum db-path]
-  (let [user-str (r/atom @(rf/subscribe [::subs/nested-value db-path]))]
+  (let [user-str  (r/atom @(rf/subscribe [::subs/nested-value db-path]))]
     (fn [label minimum maximum db-path]
       [input (sx {:value @user-str
                   :type :number :min minimum :max maximum
                   :-label label
-                  :on-change #(reset! user-str (-> % .-target .-value))
-                  :on-blur   #(rf/dispatch [::events/set-numeric-config db-path @user-str])})])))
+                  :on-change #(reset! user-str (util/if-empty-then minimum (-> % .-target .-value)))
+                  :on-blur   (rf/dispatch [::events/set-numeric-config db-path (util/clamp minimum maximum @user-str)])})])))
 
 (defn string-input
   "This component allows configuration of a string value. It is a form-2 component
@@ -79,19 +79,24 @@
    must remain lower than max and max higher than min."
   []
   (let [options @(rf/subscribe [::subs/sequencer-options])
+        user-minn (r/atom (options :min))
+        user-maxx (r/atom (options :max))
         minn     (options :min)
         maxx     (options :max)]
-    [:div (sx :.flex-row-se :ai--c)
-     [input (sx {:-label "Min:"
-                 :value minn :min 1 :max (dec maxx) :type :number
-                 :on-change (fn [e]
+    (fn []
+      [:div (sx :.flex-row-se :ai--c)
+       [input (sx {:-label "Min:"
+                   :value @user-minn :min 1 :max (dec maxx) :type :number
+                   :on-change #(reset! user-minn (util/if-empty-then minn (-> % .-target .-value)))
+                   :on-blur (fn [e]
                               (rf/dispatch [::events/set-numeric-config [:config :sequencer :min] (-> e .-target .-value)])
                               (rf/dispatch [::events/enforce-max-length]))})]
-     [input (sx {:-label "Max:"
-                 :value maxx :min (inc minn) :max 15 :type :number
-                 :on-change (fn [e]
+       [input (sx {:-label "Max:"
+                   :value @user-maxx :min (inc minn) :max 15 :type :number
+                   :on-change #(reset! user-maxx (util/if-empty-then minn (-> % .-target .-value)))
+                   :on-blur (fn [e]
                               (rf/dispatch [::events/set-numeric-config [:config :sequencer :max] (-> e .-target .-value)])
-                              (rf/dispatch [::events/enforce-max-length]))})]]))
+                              (rf/dispatch [::events/enforce-max-length]))})]])))
 
 (defn sequencer-len-dups
   []
