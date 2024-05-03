@@ -33,7 +33,8 @@
               {:style {:top :45% :left :10%}})
       "Musical Practice Tools"]
      [:span (sx :.absolute :.large :.oblique
-                {:style {:top :50% :left :15%}}) "— Improvise efficiently."]]))
+                {:style {:top :50% :left :15%}})
+      "— Improvise efficiently."]]))
 
 (defn generation-warning
   "A component displaying text about when the next generation
@@ -272,7 +273,8 @@
    [toolsbar]
    [control-card]
    [modal/sunshine-button]
-   (when @show-splash-screen?
+   (when (and (not goog.DEBUG) ;; only in production
+          @show-splash-screen?)
      [splash-screen]) ;; shown briefly, then deleted
    ])
 
