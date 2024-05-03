@@ -4,7 +4,7 @@
 (def musical-keys-with-sharps ["A" "A♯" "B" "C" "C♯" "D" "D♯" "E" "F" "F♯" "G" "G♯" ])
 
 (def default-sequencer-options
-  {:delimiter "  ->  " ;; string to separate number
+  {:delimiter " -> " ;; string to separate number
    :min       1        ;; lowest possible value
    :max       8        ;; highest possible value
    :len       4        ;; length of sequence
@@ -17,7 +17,7 @@
 
 (def default-db
   {:audio-context (js/AudioContext.)    ;; JS AudioContext object. Initialized on page load.
-   :music {:sequence "1, 2, 3" :key "A" ;; Current iteration of the generations.
+   :music {:sequence "1 -> 2 -> 3" :key "A" ;; Current iteration of the generations.
            :toggler  0  :expression "beautifully"}
    :show  #{}                           ;; Set containing the tools shown in display.
    :lock  #{}                           ;; Set containing the tools which should not regenerate.
