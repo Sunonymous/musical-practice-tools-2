@@ -13,3 +13,25 @@ body * {
   /* height: 100%; */
 }
 body.dark {background-color: rgb(44, 44, 44);}
+
+@keyframes fadeAndSlideUp {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+#splash {
+  animation: fadeAndSlideUp 2.5s ease-out forwards;
+  animation-delay: 2s;
+  background-color: white;
+  width:     100dvw;
+  height:    100dvh;
+  position:  fixed;
+  top:       0;
+  left:      0;
+}

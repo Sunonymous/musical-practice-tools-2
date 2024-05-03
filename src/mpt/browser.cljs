@@ -23,6 +23,18 @@
 
 ;; Application Components and Tools
 
+(defonce show-splash-screen? (r/atom true))
+(defn splash-screen
+  "Screen popping up to distract the user from the css injection."
+  []
+  (let [_ (js/setTimeout #(reset! show-splash-screen? false) 5000)]
+    [:div#splash (sx :flex-col-sa :bgc--white)
+     [:h1 (sx :.absolute :.bold :.xxxlarge
+              {:style {:top :45% :left :6rem}})
+      "Musical Practice Tools"]
+     [:span (sx :.absolute :.large :.oblique
+                {:style {:top :50% :left :12rem}}) "— Improvise efficiently."]]))
+
 (defn generation-warning
   "A component displaying text about when the next generation
    will occur. Only appears when the metronome is playing
@@ -139,7 +151,8 @@
                       :on-click  #(rf/dispatch [::events/toggle-tool-attribute :sync tool-kw])
                       :aria-label (str "Sync " title " with Metronome")})
           [icon (if synced? :update :update-disabled)]])
-       [modal/config tool-kw]]]])
+       (when visible?
+         [modal/config tool-kw])]]])
   )
 
 (defn toolsbar
@@ -260,6 +273,8 @@
    [:canvas#metrocanvas #_(sx :d--none)]
    [toolsbar]
    [control-card]
+   (when @show-splash-screen?
+     [splash-screen]) ;; shown briefly, then deleted
    ])
 
 ;; start is called by init and after code reloading finishes
