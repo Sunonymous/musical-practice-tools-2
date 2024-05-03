@@ -28,8 +28,8 @@
   "Screen popping up to distract the user from the css injection."
   []
   (let [_ (js/setTimeout #(reset! show-splash-screen? false) 5000)]
-    [:div#splash (sx :flex-col-sa :bgc--white)
-     [:h1 (sx :.absolute :.bold :.xxxlarge
+    [:div#splash
+     [:h1 (sx :.absolute :.bold :.xxlarge
               {:style {:top :45% :left :10%}})
       "Musical Practice Tools"]
      [:span (sx :.absolute :.large :.oblique
@@ -92,7 +92,7 @@
     [:div (sx :mis--auto :mbe--auto :w--fit-content
               {:style {:opacity (if @(rf/subscribe [::subs/is-visible? :expression]) 1 0)
                        :transition "opacity 0.25s"}})
-     [:p "Expression:"]
+     [:p (sx :ta--r) "Expression:"]
      [:p (sx :.large :.bold
              {:style {:justify-self :flex-end}})
       @(rf/subscribe [::subs/expression])]]]

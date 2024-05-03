@@ -26,8 +26,8 @@ body.dark {background-color: rgb(44, 44, 44);}
 }
 
 #splash {
-  animation: fadeAndSlideUp 2.5s ease-out forwards;
-  animation-delay: 2s;
+  animation: fadeAndSlideUp 1s ease-out forwards;
+  animation-delay: 3s;
   background-color: white;
   width:     100dvw;
   height:    100dvh;
