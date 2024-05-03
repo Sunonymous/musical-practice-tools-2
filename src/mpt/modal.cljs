@@ -179,7 +179,7 @@
     [:div
      [button
       (sx :.toolmenu-button {:on-click #(open-kushi-modal modal-id)})
-      [icon (sx :.large {:-icon-filled? true }) :settings]]
+      [icon (sx :.large {:-icon-filled? true}) :settings]]
      [modal
       (sx
        :border-radius--24px
@@ -195,6 +195,62 @@
        (sx :.flex-row-fe :gap--1em)
        [button
         (sx :.minimal :.pill {:on-click close-kushi-modal})
-        "Close"]
-       ]]])
-)
+        "Close"]]]]))
+
+(defn anchor
+  [url text]
+  [:a (sx :.oblique :.tight :hover:td--u :.wee-bold
+          :hover:c--blue :hover:cursor--pointer
+          {:target "_blank"
+           :rel    "noreferrer noopener"
+           :href   url})
+   text])
+
+(defn sunshine-button
+  "Toggles modal for credits and personal links."
+  []
+  (let [modal-id "sunshine"]
+    [:div
+     [button
+      (sx :bgc--transparent :c--gold :.pill
+          {:style {:position :fixed :left :1rem :bottom :1rem}
+           :on-click #(open-kushi-modal modal-id)})
+      [icon (sx :.xxxlarge {:-icon-filled? true}) :flare]]
+     [modal
+      (sx
+       :border-radius--24px
+       :b--2px:solid:$gray-900
+       :&_.kushi-modal-description:fs--$small
+       {:-modal-title "Musical Practice Tools — Credits"
+        :id modal-id})
+      [:div
+       (sx :.flex-col-fs :gap--1em :.thin )
+       [:p "Written in "
+        [anchor "https://clojurescript.org" "ClojureScript"]
+         " using "
+        [anchor "https://github.com/day8/re-frame/" "re-frame "]
+         "and "
+        [anchor "https://github.com/kushidesign/kushi" "kushi"]
+        "."]
+       [:p "It's also... "
+        [anchor "https://github.com/Sunonymous/musical-practice-tools-2" "open source"]
+         "!"]
+       [:p (sx :.wee-bold {:style {:align-self :flex-end}})
+        "With " [:span (sx :c--red) "love"] ","]
+       [:p (sx :ta--r :.oblique {:style {:align-self :flex-end}})
+        "Sunny"]
+
+       ]
+      [:div
+       (sx :.flex-row-sb)
+       ;; TODO user can click outside of link :(
+       ;; the reason its inside a button is to reflect the same styling as
+       ;; the close button below
+       [button (sx :.minimal :.pill)
+        [:a (sx :hover:td--u
+             {:href "mailto:embodiedsunshine@gmail.com"})
+                "Feedback? 🙏"]]
+       [button
+        (sx :.minimal :.pill {:on-click close-kushi-modal})
+        "Close"]]]]))
+

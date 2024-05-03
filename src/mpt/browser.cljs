@@ -271,6 +271,7 @@
    [:canvas#metrocanvas (sx  #_:d--none)]
    [toolsbar]
    [control-card]
+   [modal/sunshine-button]
    (when @show-splash-screen?
      [splash-screen]) ;; shown briefly, then deleted
    ])
