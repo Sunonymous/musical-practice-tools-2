@@ -255,7 +255,7 @@
   "Stitches together controls for metronome, generation, and sync."
   []
   [card (sx :w--fit-content :.flex-col-c :gap--0.25rem
-            :pi--2rem :mb--1rem :.rounded
+            :pi--2rem :.rounded
             {:style {:align-self :flex-end}})
    [control-buttons]
    [metronome-controls]
@@ -263,7 +263,7 @@
 
 (defn main-view []
   [:div
-   (sx :w--100% :.flex-col-c :ai--c
+   (sx :.flex-col-c :ai--c
        {:style {:overflow :hidden}})
    [display-panel]
    [starting-text]
