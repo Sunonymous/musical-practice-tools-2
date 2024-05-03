@@ -242,10 +242,12 @@
        ]
       [:div
        (sx :.flex-row-sb)
-       ;; TODO user can click outside of link :(
-       ;; the reason its inside a button is to reflect the same styling as
-       ;; the close button below
-       [button (sx :.minimal :.pill)
+       [button (sx :.minimal :.pill
+                   {:on-click
+                    (fn [e]
+                      (let [elem (-> e .-target)
+                            anc  (.querySelector elem "a")]
+                        (when anc (.click anc))))})
         [:a (sx :hover:td--u
              {:href "mailto:embodiedsunshine@gmail.com"})
                 "Feedback? 🙏"]]
