@@ -199,7 +199,7 @@
 
 (defn anchor
   [url text]
-  [:a (sx :.oblique :.tight :hover:td--u :.wee-bold
+  [:a (sx :.tight :hover:td--u :.wee-bold
           :hover:c--blue :hover:cursor--pointer
           {:target "_blank"
            :rel    "noreferrer noopener"
@@ -221,23 +221,22 @@
        :border-radius--24px
        :b--2px:solid:$gray-900
        :&_.kushi-modal-description:fs--$small
-       {:-modal-title "Musical Practice Tools — Credits"
+       {:-modal-title "Credits"
         :id modal-id})
       [:div
-       (sx :.flex-col-fs :gap--1em :.thin )
+       (sx :.flex-col-fs :gap--1em)
        [:p "Written in "
         [anchor "https://clojurescript.org" "ClojureScript"]
          " using "
         [anchor "https://github.com/day8/re-frame/" "re-frame "]
          "and "
         [anchor "https://github.com/kushidesign/kushi" "kushi"]
-        "."]
-       [:p "It's also... "
+        ". It's also "
         [anchor "https://github.com/Sunonymous/musical-practice-tools-2" "open source"]
          "!"]
        [:p (sx :.wee-bold {:style {:align-self :flex-end}})
         "With " [:span (sx :c--red) "love"] ","]
-       [:p (sx :ta--r :.oblique {:style {:align-self :flex-end}})
+       [:p (sx :ta--r {:style {:align-self :flex-end}})
         "Sunny"]
 
        ]
