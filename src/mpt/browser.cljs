@@ -119,12 +119,12 @@
         locked?  @(rf/subscribe [::subs/is-locked?  tool-kw])
         synced?  @(rf/subscribe [::subs/is-synced?  tool-kw])]
     [:div (sx {:style {:margin-bottom :0.5rem}})
-      [:p (sx :c--white :.medium :.extra-bold) title]
+     [:p (sx :c--white :.medium :.extra-bold) title]
      [:div (sx :bgc--white :w--fit-content :p--0.25rem:0.5rem :mb--0.25rem
                {:style {:margin-left :-1rem
                         :padding-left :1rem
                         :border-radius "0 16px 16px 0"}})
-      [:div (sx :d--f :pis--0.5rem :pb--0.25rem :gap--8px )
+      [:div (sx :d--f :pis--0.5rem :pb--0.25rem :gap--8px)
        [button (sx :.toolmenu-button (when visible? :.filled)
                    {:on-click  (fn [_] ;; disable that starting text
                                  (rf/dispatch [::events/toggle-tool-attribute :show tool-kw])
@@ -157,7 +157,9 @@
 (defn toolsbar
   "Contains all the tool-menu components for each individual tool."
   []
-  [:div (sx {:style {:align-self :flex-start}})
+  [:div (sx {:style {:align-self :flex-start
+                     :position   :relative ;; nudge upwards a bit
+                     :bottom     :3rem}})  ;; to use the empty space
    [starting-text]
    [tool-menu "Key"        :key]
    [tool-menu "Expression" :expression]
