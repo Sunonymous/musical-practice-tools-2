@@ -258,7 +258,7 @@
   []
   [card (sx :w--fit-content :.flex-col-c :gap--0.25rem
             :pi--2rem :.rounded
-            {:style {:align-self :flex-end}})
+            {:style {:align-self :center}})
    [control-buttons]
    [metronome-controls]
    [sync-controls]])
