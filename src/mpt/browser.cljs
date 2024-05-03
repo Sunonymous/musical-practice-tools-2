@@ -30,10 +30,10 @@
   (let [_ (js/setTimeout #(reset! show-splash-screen? false) 5000)]
     [:div#splash (sx :flex-col-sa :bgc--white)
      [:h1 (sx :.absolute :.bold :.xxxlarge
-              {:style {:top :45% :left :6rem}})
+              {:style {:top :45% :left :10%}})
       "Musical Practice Tools"]
      [:span (sx :.absolute :.large :.oblique
-                {:style {:top :50% :left :12rem}}) "— Improvise efficiently."]]))
+                {:style {:top :50% :left :15%}}) "— Improvise efficiently."]]))
 
 (defn generation-warning
   "A component displaying text about when the next generation
