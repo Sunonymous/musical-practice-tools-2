@@ -170,30 +170,37 @@
 (defonce audio-chunks (r/atom []))
 
 (defn startRecording []
-  (let [stream (js/navigator.mediaDevices.getUserMedia (clj->js {:audio true}))]
-    (.then stream
-           (fn [s]
-             (reset! media-recorder (js/MediaRecorder. s))
-             (set! (.-ondataavailable @media-recorder)
-                   (fn [event]
-                     (swap! audio-chunks conj (.-data event))))
-             (.start @media-recorder)))
-    (.catch stream
-            (fn [err]
-              (js/console.error "Error accessing media devices." err)))))
+  (try
+    (let [stream (js/navigator.mediaDevices.getUserMedia (clj->js {:audio true}))]
+      (.then stream
+             (fn [s]
+               (reset! media-recorder (js/MediaRecorder. s))
+               (set! (.-ondataavailable @media-recorder)
+                     (fn [event]
+                       (swap! audio-chunks conj (.-data event))))
+               (.start @media-recorder)))
+      (.catch stream
+              (fn [err]
+                (js/console.error "Error accessing media devices." err)))
+      (rf/dispatch [::events/start-recording]))
+    (catch js/Error e
+      (js/console.error "Error starting media recorder." e))))
 
 (defn stopRecording []
   (try
     (.stop @media-recorder)
     (set! (.-onstop @media-recorder)
           (fn []
-            (let [blob (js/Blob. @audio-chunks #js {:type "audio/wav"})
+            (let [blob (js/Blob. @audio-chunks #js {:type "audio/mp3"})
                   url (js/URL.createObjectURL blob)
-                  a (js/document.createElement "a")]
+                  a (js/document.createElement "a")
+                  timestamp (.toISOString (js/Date.))
+                  filename (str "recording_" timestamp ".mp3")]
               (set! (.-href a) url)
-              (set! (.-download a) "recording.wav")
+              (set! (.-download a) (js/prompt "Enter filename:" filename))
               (.click a)
               (reset! audio-chunks []))))
+    (rf/dispatch [::events/stop-recording])
     (catch js/Error e
       (js/console.error "Error stopping media recorder." e))))
 
@@ -231,12 +238,8 @@
      (sx :.filled :.pill :.xlarge :.semi-bold
          {:on-click (fn [_]
                       (if @(rf/subscribe [::subs/is-recording])
-                        (do
-                          (stopRecording)
-                          (rf/dispatch [::events/stop-recording]))
-                        (do
-                          (startRecording)
-                          (rf/dispatch [::events/start-recording]))))})
+                        (stopRecording)
+                        (startRecording)))})
      (tooltip-attrs {:-text "Start/Stop Recording"}))
     [icon (if @(rf/subscribe [::subs/is-recording]) :stop :fiber_manual_record)]]])
 

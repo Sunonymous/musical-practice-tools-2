@@ -236,11 +236,13 @@
      (.stop @media-recorder)
      (set! (.-onstop @media-recorder)
            (fn []
-             (let [blob (js/Blob. @audio-chunks #js {:type "audio/wav"})
+             (let [blob (js/Blob. @audio-chunks #js {:type "audio/mp3"})
                    url (js/URL.createObjectURL blob)
-                   a (js/document.createElement "a")]
+                   a (js/document.createElement "a")
+                   timestamp (.toISOString (js/Date.))
+                   filename (str "recording_" timestamp ".mp3")]
                (set! (.-href a) url)
-               (set! (.-download a) "recording.wav")
+               (set! (.-download a) (js/prompt "Enter filename:" filename))
                (.click a)
                (reset! audio-chunks []))))
      (assoc db :is-recording false)
