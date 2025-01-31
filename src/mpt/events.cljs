@@ -206,6 +206,8 @@
          (assoc-in [:music :key] key)
          (update-in [:config :key :seen] conj key)))))
 
+(defonce audio-chunks (atom []))
+
 (rf/reg-event-db
  ::start-recording
  (fn [db]
