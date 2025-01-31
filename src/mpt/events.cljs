@@ -206,6 +206,7 @@
          (assoc-in [:music :key] key)
          (update-in [:config :key :seen] conj key)))))
 
+(defonce media-recorder (atom nil))
 (defonce audio-chunks (atom []))
 
 (rf/reg-event-db
