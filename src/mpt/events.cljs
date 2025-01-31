@@ -209,9 +209,38 @@
 (rf/reg-event-db
  ::start-recording
  (fn [db]
-   (assoc db :is-recording true)))
+   (try
+     (let [stream (js/navigator.mediaDevices.getUserMedia (clj->js {:audio true}))]
+       (.then stream
+              (fn [s]
+                (reset! media-recorder (js/MediaRecorder. s))
+                (set! (.-ondataavailable @media-recorder)
+                      (fn [event]
+                        (swap! audio-chunks conj (.-data event))))
+                (.start @media-recorder)))
+       (.catch stream
+               (fn [err]
+                 (js/console.error "Error accessing media devices." err)))
+       (assoc db :is-recording true))
+     (catch js/Error e
+       (js/console.error "Error starting media recorder." e)
+       db))))
 
 (rf/reg-event-db
  ::stop-recording
  (fn [db]
-   (assoc db :is-recording false)))
+   (try
+     (.stop @media-recorder)
+     (set! (.-onstop @media-recorder)
+           (fn []
+             (let [blob (js/Blob. @audio-chunks #js {:type "audio/wav"})
+                   url (js/URL.createObjectURL blob)
+                   a (js/document.createElement "a")]
+               (set! (.-href a) url)
+               (set! (.-download a) "recording.wav")
+               (.click a)
+               (reset! audio-chunks []))))
+     (assoc db :is-recording false)
+     (catch js/Error e
+       (js/console.error "Error stopping media recorder." e)
+       db))))
