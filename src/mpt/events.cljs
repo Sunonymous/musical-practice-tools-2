@@ -205,3 +205,13 @@
      (-> db
          (assoc-in [:music :key] key)
          (update-in [:config :key :seen] conj key)))))
+
+(rf/reg-event-db
+ ::start-recording
+ (fn [db]
+   (assoc db :is-recording true)))
+
+(rf/reg-event-db
+ ::stop-recording
+ (fn [db]
+   (assoc db :is-recording false)))

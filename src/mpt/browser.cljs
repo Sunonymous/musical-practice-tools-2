@@ -166,6 +166,29 @@
    [tool-menu "Sequencer"  :sequencer]
    [tool-menu "Toggler"    :toggler]])
 
+(defonce media-recorder (r/atom nil))
+(defonce audio-chunks (r/atom []))
+
+(defn startRecording []
+  (let [stream (js/navigator.mediaDevices.getUserMedia (clj->js {:audio true}))]
+    (reset! media-recorder (js/MediaRecorder. stream))
+    (set! (.-ondataavailable @media-recorder)
+          (fn [event]
+            (swap! audio-chunks conj (.-data event))))
+    (.start @media-recorder)))
+
+(defn stopRecording []
+  (.stop @media-recorder)
+  (set! (.-onstop @media-recorder)
+        (fn []
+          (let [blob (js/Blob. @audio-chunks #js {:type "audio/wav"})
+                url (js/URL.createObjectURL blob)
+                a (js/document.createElement "a")]
+            (set! (.-href a) url)
+            (set! (.-download a) "recording.wav")
+            (.click a)
+            (reset! audio-chunks [])))))
+
 (defn control-buttons
   "These buttons rest at the bottom of the screen
    and control the metronome and new generation."
@@ -194,7 +217,20 @@
      (sx :.filled :.pill :.xlarge :.semi-bold
          {:on-click (fn [_] (swap! metronome/state update :silent not))})
      (tooltip-attrs {:-text "Un/mute Metronome"}))
-    [icon (if (@metronome/state :silent) :volume-off :volume-up)]]])
+    [icon (if (@metronome/state :silent) :volume-off :volume-up)]]
+   [button ;; Start/Stop Recording
+    (merge-attrs
+     (sx :.filled :.pill :.xlarge :.semi-bold
+         {:on-click (fn [_]
+                      (if @(rf/subscribe [::subs/is-recording])
+                        (do
+                          (stopRecording)
+                          (rf/dispatch [::events/stop-recording]))
+                        (do
+                          (startRecording)
+                          (rf/dispatch [::events/start-recording]))))})
+     (tooltip-attrs {:-text "Start/Stop Recording"}))
+    [icon (if @(rf/subscribe [::subs/is-recording]) :stop :fiber_manual_record)]]])
 
 (defn metronome-controls
   "Buttons to control the operation of the metronome."
@@ -257,7 +293,6 @@
 
 (defn control-card
   "Stitches together controls for metronome, generation, and sync."
-  []
   [card (sx :w--fit-content :.flex-col-c :gap--0.25rem
             :pi--2rem :.rounded
             {:style {:align-self :center}})

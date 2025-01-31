@@ -35,4 +35,5 @@
             :use-roman-numerals? false   ;; use roman numerals to display sequences
             :vary-roman-case?    false   ;; vary the case of the roman numerals
             }
+   :is-recording false
   })

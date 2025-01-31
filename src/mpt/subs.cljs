@@ -88,3 +88,8 @@
 
 (rf/reg-sub ;; for debugging purposes!
  ::full (fn [db] db))
+
+(rf/reg-sub
+ ::is-recording
+ (fn [db]
+   (:is-recording db)))
