@@ -205,3 +205,47 @@
      (-> db
          (assoc-in [:music :key] key)
          (update-in [:config :key :seen] conj key)))))
+
+(defonce media-recorder (atom nil))
+(defonce audio-chunks (atom []))
+
+(rf/reg-event-db
+ ::start-recording
+ (fn [db]
+   (try
+     (let [stream (js/navigator.mediaDevices.getUserMedia (clj->js {:audio true}))]
+       (.then stream
+              (fn [s]
+                (reset! media-recorder (js/MediaRecorder. s))
+                (set! (.-ondataavailable @media-recorder)
+                      (fn [event]
+                        (swap! audio-chunks conj (.-data event))))
+                (.start @media-recorder)))
+       (.catch stream
+               (fn [err]
+                 (js/console.error "Error accessing media devices." err)))
+       (assoc db :is-recording true))
+     (catch js/Error e
+       (js/console.error "Error starting media recorder." e)
+       db))))
+
+(rf/reg-event-db
+ ::stop-recording
+ (fn [db]
+   (try
+     (.stop @media-recorder)
+     (set! (.-onstop @media-recorder)
+           (fn []
+             (let [blob (js/Blob. @audio-chunks #js {:type "audio/mp3"})
+                   url (js/URL.createObjectURL blob)
+                   a (js/document.createElement "a")
+                   timestamp (.toISOString (js/Date.))
+                   filename (str "recording_" timestamp ".mp3")]
+               (set! (.-href a) url)
+               (set! (.-download a) (js/prompt "Enter filename:" filename))
+               (.click a)
+               (reset! audio-chunks []))))
+     (assoc db :is-recording false)
+     (catch js/Error e
+       (js/console.error "Error stopping media recorder." e)
+       db))))
